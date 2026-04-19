@@ -60,8 +60,6 @@ const HomeScreen = () => {
                                 key={index}
                                 title={deal.title}
                                 description={deal.description}
-                                image1={deal.image1}
-                                image2={deal.image2}
                                 onPress={() => console.log(`${deal.title} pressed`)}
                             />
                         ))}
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
         marginLeft: 10 
     },
     cart: { 
-        backgroundColor: '#FE552A', 
+        backgroundColor: '#000000', 
         borderRadius: 5, 
         alignItems: 'center', 
         justifyContent: 'center', 

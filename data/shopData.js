@@ -1,21 +1,15 @@
 export const deals = [
     { 
         title: "WELCOME 2026", 
-        description: "Giảm 50k cho đơn hàng đầu tiên", 
-        image1: { uri: 'https://img.freepik.com/free-vector/fashion-sale-banner-template_23-2148841460.jpg' },
-        image2: { uri: 'https://cdn-icons-png.flaticon.com/512/726/726448.png' } 
+        description: "Giảm 50k cho đơn hàng đầu tiên"
     },
     { 
         title: "HE10 - Giảm 10%", 
-        description: "Bộ sưu tập mùa hè rực rỡ", 
-        image1: { uri: 'https://img.freepik.com/free-psd/horizontal-banner-online-fashion-sale_23-2148585404.jpg' }, 
-        image2: { uri: 'https://cdn-icons-png.flaticon.com/512/2698/2698194.png' } 
+        description: "Bộ sưu tập mùa hè rực rỡ"
     },
     { 
         title: "FREESHIP", 
-        description: "Miễn phí vận chuyển toàn quốc", 
-        image1: { uri: 'https://img.freepik.com/free-vector/delivery-service-with-mask-concept_23-2148505116.jpg' }, 
-        image2: { uri: 'https://cdn-icons-png.flaticon.com/512/2311/2311523.png' } 
+        description: "Miễn phí vận chuyển toàn quốc"
     },
 ];
 

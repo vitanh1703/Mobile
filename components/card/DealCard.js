@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 
-const DealCard = ({ title, description, image1, image2, onPress }) => {
+const DealCard = ({ title, description, onPress }) => {
     const { theme } = useTheme();
     
     return (
@@ -21,10 +21,6 @@ const DealCard = ({ title, description, image1, image2, onPress }) => {
                     </Text>
                 )}
             </View>
-            <View style={styles.imageContainer}>
-                <Image source={image1} style={styles.imageLeft} />
-                <Image source={image2} style={styles.imageRight} />
-            </View>
         </TouchableOpacity>
     );
 };
@@ -32,7 +28,7 @@ const DealCard = ({ title, description, image1, image2, onPress }) => {
 const styles = StyleSheet.create({
     card: {
         width: 150,
-        height: 170,
+        height: 100, // Thu nhỏ chiều cao vì không còn ảnh
         borderRadius: 16,
         padding: 12,
         marginRight: 15,
@@ -41,38 +37,21 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.08,
         shadowRadius: 8,
         elevation: 4, // Đổ bóng cho Android
-        justifyContent: 'space-between',
+        justifyContent: 'center', // Căn giữa nội dung theo chiều dọc
     },
     textContainer: {
-        marginBottom: 8,
+        alignItems: 'center', // Căn giữa chữ
     },
     title: {
         fontSize: 15,
         fontWeight: 'bold',
         marginBottom: 4,
+        textAlign: 'center',
     },
     description: {
         fontSize: 11,
         lineHeight: 16,
-    },
-    imageContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-    },
-    imageLeft: {
-        width: 60,
-        height: 60,
-        borderRadius: 10,
-        resizeMode: 'cover',
-        alignSelf: 'flex-start',
-    },
-    imageRight: {
-        width: 45,
-        height: 45,
-        resizeMode: 'contain',
-        alignSelf: 'flex-end',
-        marginTop: -15, // Tạo hiệu ứng xếp chồng/so le đẹp mắt
+        textAlign: 'center',
     },
 });
 
