@@ -72,15 +72,20 @@ const HomeScreen = () => {
                 {/* Deals */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: theme.text }]}>Khuyến mãi đặc biệt</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {deals.map((deal, index) => (
-                            <DealCard
-                                key={index}
-                                title={deal.title}
-                                description={deal.description}
-                                onPress={() => console.log(`${deal.title} pressed`)}
-                            />
-                        ))}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
+                        {deals.map((deal, index) => {
+                            const discountText = deal.type === 'FixedAmount' ? `-${deal.value / 1000}K` : `-${deal.value}%`;
+                            return (
+                                <DealCard
+                                    key={index}
+                                    code={deal.title}
+                                    title="ƯU ĐÃI ĐẶC BIỆT"
+                                    description={deal.description}
+                                    discountText={discountText}
+                                    onPress={() => console.log(`${deal.title} pressed`)}
+                                />
+                            );
+                        })}
                     </ScrollView>
                 </View>
 
