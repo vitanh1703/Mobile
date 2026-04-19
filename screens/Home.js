@@ -68,7 +68,12 @@ const HomeScreen = () => {
 
                 {/* Deals */}
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Khuyến mãi đặc biệt</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+                        <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 0 }]}>Khuyến mãi đặc biệt</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate("Promotion")}>
+                            <Text style={{ color: theme.text1, fontSize: 13, fontWeight: '600' }}>Xem tất cả</Text>
+                        </TouchableOpacity>
+                    </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
                         {deals.map((deal, index) => {
                             const discountText = deal.type === 'FixedAmount' ? `-${deal.value / 1000}K` : `-${deal.value}%`;

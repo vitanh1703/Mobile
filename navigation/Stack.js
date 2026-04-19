@@ -7,6 +7,7 @@ import ProductsScreen from '../screens/Products';
 import PaymentScreen from '../screens/Payment';
 import CheckoutScreen from '../screens/Checkout';
 import WalletScreen from '../screens/Wallet';
+import PromotionScreen from '../screens/Promotion';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ export default function MainStack({ route }) {
       <Stack.Screen name="Payment" component={PaymentScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Wallet" component={WalletScreen} />
+      <Stack.Screen name="Promotion" component={PromotionScreen} />
     </Stack.Navigator>
   );
 }
