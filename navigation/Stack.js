@@ -2,10 +2,9 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/Home';
 import CartScreen from '../screens/Cart';
-import ProductDetailScreen from '../screens/ProductDetail';
 import FavouritesScreen from '../screens/Favourites';
 import ProductsScreen from '../screens/Products';
-import NewsDetailScreen from '../screens/NewsDetail';
+import PaymentScreen from '../screens/Payment';
 
 const Stack = createStackNavigator();
 
@@ -17,10 +16,9 @@ export default function MainStack({ route }) {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} initialParams={{ user }} />
       <Stack.Screen name="Cart" component={CartScreen} />
-      <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="Favourite" component={FavouritesScreen} />
       <Stack.Screen name="Products" component={ProductsScreen} />
-      <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
+      <Stack.Screen name="Payment" component={PaymentScreen} />
     </Stack.Navigator>
   );
 }

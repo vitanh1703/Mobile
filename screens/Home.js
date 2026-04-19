@@ -42,9 +42,6 @@ const HomeScreen = () => {
                         <TouchableOpacity onPress={toggleTheme}>
                             <Ionicons name={theme.icon} size={28} color={theme.text} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Favourite")} style={{ marginLeft: 12 }}>
-                            <Ionicons name="heart-outline" size={28} color={theme.text} />
-                        </TouchableOpacity>
                         <TouchableOpacity style={styles.cart} onPress={() => navigation.navigate("Cart")}>
                             <Ionicons name="bag-handle-outline" size={20} color={'#fff'} style={{ padding: 5 }} />
                         </TouchableOpacity>

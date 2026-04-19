@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions
 import { Feather as Icon, MaterialIcons as MaterialIcon, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { user } = route?.params || {};
   const { theme } = useTheme();
 
@@ -47,6 +49,9 @@ const ProfileScreen = ({ route }) => {
       fontWeight: 'bold',
       color: theme.text,
     },
+    headerRightBtn: {
+      padding: 8,
+    },
     profileHeader: { alignItems: 'center', marginBottom: 30, marginTop: 10 },
     avatarContainer: { position: 'relative' },
     avatar: { width: 110, height: 110, borderRadius: 55, borderWidth: 2, borderColor: theme.background1 },
@@ -76,7 +81,9 @@ const ProfileScreen = ({ route }) => {
       <View style={styles.header}>
         <ButtonGoBack />
         <Text style={styles.headerTitle}>Hồ sơ cá nhân</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity style={styles.headerRightBtn} onPress={() => navigation.navigate('Settings')}>
+          <Icon name="settings" size={24} color={theme.text} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>

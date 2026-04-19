@@ -45,15 +45,37 @@ const mockReviewsData = {
 
 const ProductDetailScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { theme } = useTheme();
   const { addToCart } = useCart();
+  const { id } = route.params || {};
 
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  // Dữ liệu dùng tạm
-  const product = mockProduct;
+  // Tìm sản phẩm từ mảng dữ liệu dựa vào id truyền tới
+  const product = useMemo(() => {
+    const item = productItems.find((p) => p.id === id);
+    if (item) {
+      return {
+        id: item.id,
+        name: item.title,
+        brandText: item.brand || 'H&Q Store',
+        description: 'Mô tả chi tiết sản phẩm. Thiết kế basic dễ phối đồ, phù hợp mặc hàng ngày.',
+        imageUrl: item.image?.uri,
+        variants: [
+          { id: parseInt(`${item.id}101`), color: 'Trắng', size: 'S', price: item.price, stockQuantity: 10 },
+          { id: parseInt(`${item.id}102`), color: 'Trắng', size: 'M', price: item.price, stockQuantity: 5 },
+          { id: parseInt(`${item.id}103`), color: 'Trắng', size: 'L', price: item.price, stockQuantity: 0 }, // Hết hàng
+          { id: parseInt(`${item.id}104`), color: 'Đen', size: 'M', price: item.price, stockQuantity: 2 },
+          { id: parseInt(`${item.id}105`), color: 'Đen', size: 'L', price: item.price, stockQuantity: 8 },
+        ],
+      };
+    }
+    return mockProduct;
+  }, [id]);
+
   const reviewsData = mockReviewsData;
 
   // Xử lý logic lọc màu sắc và kích cỡ

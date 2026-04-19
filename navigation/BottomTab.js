@@ -7,8 +7,7 @@ import MainStack from './Stack';
 import ProfileScreen from '../screens/Profile'; 
 import ProductsScreen from '../screens/Products';
 import NewsScreen from '../screens/News';
-
-const DummyScreen = () => <View style={{ flex: 1 }} />;
+import FavouritesScreen from '../screens/Favourites';
 
 const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get('window');
@@ -53,7 +52,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           };
 
           const clr = '#000'; 
-          const iconName = ['home', 'grid', 'file-text', 'user', 'settings'][index];
+          const iconName = ['home', 'grid', 'file-text', 'user', 'heart'][index];
 
           return (
             <TouchableOpacity
@@ -95,7 +94,7 @@ export default function BottomTabNavigator({ route }) {
       <Tab.Screen name="ProductsTab" component={ProductsScreen} initialParams={{ user }} />
       <Tab.Screen name="NewsTab" component={NewsScreen} initialParams={{ user }} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} initialParams={{ user }} />
-      <Tab.Screen name="SettingsTab" component={DummyScreen} />
+      <Tab.Screen name="FavouriteTab" component={FavouritesScreen} initialParams={{ user }} />
     </Tab.Navigator>
   );
 }

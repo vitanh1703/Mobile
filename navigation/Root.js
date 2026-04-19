@@ -4,6 +4,8 @@ import BottomTabNavigator from './BottomTab';
 import LoginScreen from '../screens/Login';
 import RegisterScreen from '../screens/Register';
 import WelcomeScreen from '../screens/Welcome';
+import SettingsScreen from '../screens/Settings';
+import LogoutScreen from '../screens/Logout';
 
 const RootStack = createStackNavigator();
 
@@ -14,6 +16,8 @@ export default function RootNavigator() {
       <RootStack.Screen name="Register" component={RegisterScreen} />
       <RootStack.Screen name="App" component={BottomTabNavigator} />
       <RootStack.Screen name="Welcome" component={WelcomeScreen} />
+      <RootStack.Screen name="Settings" component={SettingsScreen} />
+      <RootStack.Screen name="Logout" component={LogoutScreen} />
     </RootStack.Navigator>
   );
 }

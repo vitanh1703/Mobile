@@ -203,13 +203,15 @@ const FavouritesScreen = () => {
         ) : (
           wishlistItems.map((item) => (
             <View key={item.id} style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('ProductDetail')}>
+              <TouchableOpacity onPress={() => navigation.navigate('ProductDetail', { id: item.productId })}>
                 <Image source={{ uri: item.image }} style={styles.image} />
               </TouchableOpacity>
               
               <View style={styles.info}>
                 <View style={styles.titleRow}>
-                  <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
+                  <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('ProductDetail', { id: item.productId })}>
+                    <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleRemoveFavorite(item.id)} style={{ paddingLeft: 10 }}>
                     <Ionicons name="heart" size={22} color="#FF6B6B" />
                   </TouchableOpacity>
