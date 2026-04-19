@@ -52,7 +52,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           };
 
           const clr = '#000'; 
-          const iconName = ['home', 'grid', 'file-text', 'user', 'heart'][index];
+          const iconName = ['home', 'grid', 'heart', 'file-text', 'user'][index];
 
           return (
             <TouchableOpacity
@@ -92,9 +92,9 @@ export default function BottomTabNavigator({ route }) {
     >
       <Tab.Screen name="HomeTab" component={MainStack} initialParams={{ user }} />
       <Tab.Screen name="ProductsTab" component={ProductsScreen} initialParams={{ user }} />
+      <Tab.Screen name="FavouriteTab" component={FavouritesScreen} initialParams={{ user }} />
       <Tab.Screen name="NewsTab" component={NewsScreen} initialParams={{ user }} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} initialParams={{ user }} />
-      <Tab.Screen name="FavouriteTab" component={FavouritesScreen} initialParams={{ user }} />
     </Tab.Navigator>
   );
 }

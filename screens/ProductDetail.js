@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -129,6 +130,34 @@ const ProductDetailScreen = () => {
     ]);
   };
 
+  // Mua ngay
+  const handleBuyNow = () => {
+    if (!selectedColor || !selectedSize) {
+      Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
+      return;
+    }
+    if (!selectedVariant || selectedVariant.stockQuantity < 1) {
+      Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
+      return;
+    }
+
+    const itemToBuy = {
+      id: selectedVariant.id,
+      productName: product.name,
+      size: selectedSize,
+      color: selectedColor,
+      quantity: quantity,
+      price: selectedVariant.price,
+      total: selectedVariant.price * quantity,
+      image: product.imageUrl
+    };
+
+    navigation.navigate('Checkout', {
+      selectedItems: [itemToBuy],
+      totalFromCart: itemToBuy.total
+    });
+  };
+
   // Hàm vẽ ngôi sao
   const renderStars = (rating) => {
     const stars = [];
@@ -153,14 +182,14 @@ const ProductDetailScreen = () => {
     },
     header: { 
         position: 'absolute', 
-        top: 40, 
+        top: 15, 
         left: 20, 
         zIndex: 10 
     },
     image: { 
         width: '100%', 
-        height: width * 1.2, 
-        resizeMode: 'cover' 
+        height: (width * 4) / 3, 
+        resizeMode: 'contain' 
     },
     content: { 
         padding: 20, 
@@ -255,17 +284,34 @@ const ProductDetailScreen = () => {
         color: theme.text, 
         marginHorizontal: 20 
     },
-    addToCartBtn: { 
-        backgroundColor: '#000', 
-        paddingVertical: 16, 
-        borderRadius: 12, 
-        alignItems: 'center', 
-        marginBottom: 30 
+    bottomBar: {
+      flexDirection: 'row',
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      backgroundColor: theme.background,
+      borderTopWidth: 1,
+      borderTopColor: theme.background1,
     },
-    addToCartText: { 
-        color: '#fff', 
-        fontSize: 16, 
-        fontWeight: 'bold' 
+    actionBtn: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 5,
+    },
+    btnOutline: {
+      backgroundColor: theme.background,
+      borderWidth: 1,
+      borderColor: theme.text,
+    },
+    btnSolid: {
+      backgroundColor: theme.text,
+    },
+    btnText: {
+      fontWeight: 'bold',
+      fontSize: 15,
+      textTransform: 'uppercase',
     },
     divider: { 
         height: 1, 
@@ -299,7 +345,7 @@ const ProductDetailScreen = () => {
   }), [theme, width]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Nút quay lại chồng lên ảnh */}
       <View style={styles.header}>
         <ButtonGoBack />
@@ -397,11 +443,6 @@ const ProductDetailScreen = () => {
             )}
           </View>
 
-          {/* Nút Thêm vào giỏ */}
-          <TouchableOpacity style={[styles.addToCartBtn, { backgroundColor: theme.text }]} onPress={handleAddToCart}>
-            <Text style={[styles.addToCartText, { color: theme.background }]}>Thêm vào giỏ hàng</Text>
-          </TouchableOpacity>
-
           {/* Phần đánh giá */}
           <View style={styles.divider} />
           <Text style={[styles.sectionTitle, { fontSize: 18 }]}>Đánh giá sản phẩm</Text>
@@ -428,7 +469,17 @@ const ProductDetailScreen = () => {
           <View style={{ height: 40 }} />
         </View>
       </ScrollView>
-    </View>
+
+      {/* Thanh công cụ dưới cùng */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={[styles.actionBtn, styles.btnOutline]} onPress={handleAddToCart} activeOpacity={0.8}>
+          <Text style={[styles.btnText, { color: theme.text }]}>Thêm vào giỏ</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtn, styles.btnSolid]} onPress={handleBuyNow} activeOpacity={0.8}>
+          <Text style={[styles.btnText, { color: theme.background }]}>Mua ngay</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 

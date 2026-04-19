@@ -59,14 +59,16 @@ const NewsScreen = () => {
   };
 
   const renderNewsItem = ({ item }) => (
-    <NewsCard
-      id={item.id}
-      category={item.category}
-      title={item.title}
-      date={item.date}
-      img={item.image}
-      desc={item.desc}
-    />
+    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('NewsDetail', { id: item.id })}>
+      <NewsCard
+        id={item.id}
+        category={item.category}
+        title={item.title}
+        date={item.date}
+        img={item.image}
+        desc={item.desc}
+      />
+    </TouchableOpacity>
   );
 
   const styles = useMemo(() => StyleSheet.create({
