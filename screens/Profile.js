@@ -59,6 +59,11 @@ const ProfileScreen = ({ route }) => {
     name: { fontSize: 24, fontWeight: 'bold', color: theme.text, marginTop: 15 },
     joinedText: { fontSize: 14, color: theme.text1, marginTop: 4 },
     
+    walletCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.text, padding: 18, borderRadius: 16, marginHorizontal: 20, marginBottom: 25, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5 },
+    walletInfo: { flex: 1, marginLeft: 15 },
+    walletTitle: { fontSize: 13, color: theme.background, opacity: 0.8, marginBottom: 4 },
+    walletBalance: { fontSize: 18, fontWeight: 'bold', color: theme.background },
+
     formContainer: { paddingHorizontal: 20 },
     inputGroup: { marginBottom: 20 },
     label: { fontSize: 14, fontWeight: '600', color: theme.text, marginBottom: 8, marginLeft: 4 },
@@ -98,6 +103,16 @@ const ProfileScreen = ({ route }) => {
           <Text style={styles.name}>{fullName || 'Khách hàng mới'}</Text>
           <Text style={styles.joinedText}>Thành viên H&Q Store</Text>
         </View>
+
+      {/* Wallet Shortcut */}
+      <TouchableOpacity style={styles.walletCard} activeOpacity={0.8} onPress={() => navigation.navigate('Wallet')}>
+        <Icon name="credit-card" size={28} color={theme.background} />
+        <View style={styles.walletInfo}>
+          <Text style={styles.walletTitle}>Ví H&Q</Text>
+          <Text style={styles.walletBalance}>1.250.000 đ</Text>
+        </View>
+        <Icon name="chevron-right" size={24} color={theme.background} />
+      </TouchableOpacity>
 
         {/* Form Editable */}
         <View style={styles.formContainer}>
