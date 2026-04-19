@@ -5,6 +5,8 @@ import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import MainStack from './Stack'; 
 import ProfileScreen from '../screens/Profile'; 
+import ProductsScreen from '../screens/Products';
+import NewsScreen from '../screens/News';
 
 const DummyScreen = () => <View style={{ flex: 1 }} />;
 
@@ -51,7 +53,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           };
 
           const clr = '#000'; 
-          const iconName = ['home', 'user', 'message-circle', 'camera', 'settings'][index];
+          const iconName = ['home', 'grid', 'file-text', 'user', 'settings'][index];
 
           return (
             <TouchableOpacity
@@ -90,9 +92,9 @@ export default function BottomTabNavigator({ route }) {
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="HomeTab" component={MainStack} initialParams={{ user }} />
+      <Tab.Screen name="ProductsTab" component={ProductsScreen} initialParams={{ user }} />
+      <Tab.Screen name="NewsTab" component={NewsScreen} initialParams={{ user }} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} initialParams={{ user }} />
-      <Tab.Screen name="MessageTab" component={DummyScreen} />
-      <Tab.Screen name="CameraTab" component={DummyScreen} />
       <Tab.Screen name="SettingsTab" component={DummyScreen} />
     </Tab.Navigator>
   );

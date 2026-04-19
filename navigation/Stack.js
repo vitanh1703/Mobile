@@ -4,6 +4,7 @@ import HomeScreen from '../screens/Home';
 import CartScreen from '../screens/Cart';
 import ProductDetailScreen from '../screens/ProductDetail';
 import FavouritesScreen from '../screens/Favourites';
+import ProductsScreen from '../screens/Products';
 
 const Stack = createStackNavigator();
 
@@ -17,6 +18,7 @@ export default function MainStack({ route }) {
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="Favourite" component={FavouritesScreen} />
+      <Stack.Screen name="Products" component={ProductsScreen} />
     </Stack.Navigator>
   );
 }

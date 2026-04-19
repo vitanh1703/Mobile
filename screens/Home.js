@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +13,15 @@ import { useTheme } from "../context/ThemeContext";
 const HomeScreen = () => {
     const navigation = useNavigation();
     const { theme, toggleTheme } = useTheme();
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            navigation.navigate("Products", { searchQuery: searchQuery.trim() });
+        } else {
+            navigation.navigate("Products");
+        }
+    };
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -49,8 +58,14 @@ const HomeScreen = () => {
                             style={[styles.searchInput, { color: theme.text }]}
                             placeholder="Tìm kiếm sản phẩm..."
                             placeholderTextColor={'rgba(133, 137, 150, 1)'}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onSubmitEditing={handleSearch}
+                            returnKeyType="search"
                         />
-                        <Ionicons name="search-outline" size={22} color={'rgba(133, 137, 150, 1)'} style={{ padding: 10 }} />
+                        <TouchableOpacity onPress={handleSearch}>
+                            <Ionicons name="search-outline" size={22} color={'rgba(133, 137, 150, 1)'} style={{ padding: 10 }} />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
