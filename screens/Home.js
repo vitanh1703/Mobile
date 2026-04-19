@@ -1,0 +1,173 @@
+import React from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
+import DealCard from "../components/card/DealCard";
+import CategoryCard from "../components/card/CategoryCard";
+import ProductCard from "../components/card/ProductCard";
+
+import { deals, clothingCategories, productItems } from "../data/shopData";
+import { useTheme } from "../context/ThemeContext";
+
+const HomeScreen = () => {
+    const navigation = useNavigation();
+    const { theme, toggleTheme } = useTheme();
+
+    return (
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+            <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.titleContainer}>
+                        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                            <Ionicons name="menu-outline" size={28} color={theme.text} />
+                        </TouchableOpacity>
+                        <Text style={[styles.title, { color: theme.text }]}>H&Q Store</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity onPress={toggleTheme}>
+                            <Ionicons name={theme.icon} size={28} color={theme.text} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.cart} onPress={() => {}}>
+                            <Ionicons name="bag-handle-outline" size={20} color={'#fff'} style={{ padding: 5 }} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Search Input */}
+                <View style={styles.searchContainer}>
+                    <View style={styles.search}>
+                        <TextInput
+                            style={[styles.searchInput, { color: theme.text }]}
+                            placeholder="Tìm kiếm sản phẩm..."
+                            placeholderTextColor={'rgba(133, 137, 150, 1)'}
+                        />
+                        <Ionicons name="search-outline" size={22} color={'rgba(133, 137, 150, 1)'} style={{ padding: 10 }} />
+                    </View>
+                </View>
+
+                {/* Deals */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Khuyến mãi đặc biệt</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {deals.map((deal, index) => (
+                            <DealCard
+                                key={index}
+                                title={deal.title}
+                                description={deal.description}
+                                image1={deal.image1}
+                                image2={deal.image2}
+                                onPress={() => console.log(`${deal.title} pressed`)}
+                            />
+                        ))}
+                    </ScrollView>
+                </View>
+
+                {/* Categories */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Danh mục</Text>
+                    <View style={styles.categoriesContainer}>
+                        {clothingCategories.map((item) => (
+                            <CategoryCard
+                                key={item.id}
+                                title={item.title}
+                                image={item.image}
+                                onPress={() => navigation.navigate("ShopByCate", {
+                                    categoryId: item.id,
+                                    categoryName: item.title,
+                                    categoryImage: item.image,
+                                })}
+                            />
+                        ))}
+                    </View>
+                </View>
+
+                {/* Popular Products */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Sản phẩm phổ biến</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {productItems.map((item) => (
+                            <ProductCard
+                                key={item.id}
+                                image={item.image}
+                                discount={item.discount}
+                                title={item.title}
+                                brand={item.brand}
+                                price={item.price}
+                                rating={item.rating}
+                                reviews={item.reviews}
+                                onPress={() => console.log(`${item.title} pressed`)}
+                            />
+                        ))}
+                    </ScrollView>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    safeArea: { 
+        flex: 1, 
+        backgroundColor: '#fff' 
+    },
+    container: { 
+        flex: 1, 
+        paddingHorizontal: 20 },
+    header: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        marginTop: 20, 
+        marginBottom: 20 
+    },
+    titleContainer: { 
+        flexDirection: 'row', 
+        alignItems: 'center' 
+    },
+    title: { 
+        fontSize: 20, 
+        fontWeight: 'bold', 
+        marginLeft: 10 
+    },
+    cart: { 
+        backgroundColor: '#FE552A', 
+        borderRadius: 5, 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        marginLeft: 10 
+    },
+    searchContainer: { 
+        marginBottom: 20 
+    },
+    search: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        borderRadius: 10, 
+        borderColor: '#C6C8CD', 
+        borderWidth: 1, 
+        height: 45, 
+        paddingHorizontal: 10 
+    },
+    searchInput: { 
+        flex: 1, 
+        fontSize: 14, 
+        paddingHorizontal: 5 
+    },
+    section: { 
+        marginBottom: 25 
+    },
+    sectionTitle: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        marginBottom: 15 
+    },
+    categoriesContainer: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between' 
+    },
+});
+
+export default HomeScreen;

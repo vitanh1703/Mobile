@@ -1,33 +1,26 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Image, Dimensions, TextInput, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 const { height, width } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handlePhoneChange = (text) => {
-    setPhoneNumber(text);
-    const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
-    !phoneRegex.test(text) ? setError("Invalid phone number") : setError("");
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    !emailRegex.test(text) ? setError("Invalid email address") : setError("");
   };
 
-  const handleSendOTP = () => {
-    navigation.navigate("Auth", { phoneNumber });
+  const handleLogin = () => {
+    navigation.replace("AppDrawer");
   };
 
-  const isDisable = !!error || !phoneNumber;
+  const isDisable = !!error || !email || !password;
   const bgColor = isDisable ? "#e0e0e0" : "#000"; 
 
   return (
@@ -39,24 +32,32 @@ const LoginScreen = () => {
       />
       <Text style={styles.text}>H&Q Store</Text>
       <Text style={styles.subText}>
-        Please Enter your Mobile Number to{"\n"}Sign In/Sign Up
+        Please Enter your Email and Password to{"\n"}Sign In
       </Text>
-      <View style={styles.phoneContainer}>
-        <Text style={{ left: 5 }}>+84</Text>
+      <View style={styles.inputContainer}>
         <TextInput
-          style={styles.phoneInput}
-          placeholder="Enter phone your number"
-          keyboardType="phone-pad"
-          value={phoneNumber}
-          onChangeText={handlePhoneChange}
-          maxLength={11}
+          style={styles.input}
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={handleEmailChange}
         />
       </View>
       {error ? <Text style={{ color: "red", marginTop: 5 }}>{error}</Text> : null}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
       <TouchableOpacity
         style={[styles.continue, { backgroundColor: bgColor }]}
         disabled={isDisable}
-        onPress={handleSendOTP}
+        onPress={handleLogin}
       >
         <Text style={{ textAlign: "center", color: "#fff" }}>CONTINUE</Text>
       </TouchableOpacity>
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
   },
-  phoneContainer: {
+  inputContainer: {
     flexDirection: "row",
     width: width * 0.7,
     alignItems: "center",
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#fff",
   },
-  phoneInput: {
+  input: {
     flex: 1,
     padding: 12,
     fontSize: 16,
