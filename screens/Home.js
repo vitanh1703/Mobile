@@ -101,7 +101,7 @@ const HomeScreen = () => {
                                 price={item.price}
                                 rating={item.rating}
                                 reviews={item.reviews}
-                                onPress={() => console.log(`${item.title} pressed`)}
+                                onPress={() => navigation.navigate("ProductDetail")}
                             />
                         ))}
                     </ScrollView>
