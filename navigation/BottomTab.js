@@ -50,8 +50,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             }
           };
 
-          const colors = ['#f44336', '#ffa117', '#0fc70f', '#2196f3', '#b145e9'];
-          const clr = colors[index];
+          const clr = '#000'; 
           const iconName = ['home', 'user', 'message-circle', 'camera', 'settings'][index];
 
           return (
