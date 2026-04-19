@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/Home';
 import CartScreen from '../screens/Cart';
 import ProductDetailScreen from '../screens/ProductDetail';
+import FavouritesScreen from '../screens/Favourites';
 
 const Stack = createStackNavigator();
 
@@ -15,6 +16,7 @@ export default function MainStack({ route }) {
       <Stack.Screen name="Home" component={HomeScreen} initialParams={{ user }} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Stack.Screen name="Favourite" component={FavouritesScreen} />
     </Stack.Navigator>
   );
 }

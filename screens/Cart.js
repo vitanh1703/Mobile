@@ -5,13 +5,14 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ScrollView,
   Dimensions,
   TextInput,
+  Alert,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import { Feather as Icon } from '@expo/vector-icons';
+import { Swipeable, ScrollView } from 'react-native-gesture-handler';
 import ButtonGoBack from '../components/ButtonGoBack';
 
 const { width } = Dimensions.get('window');
@@ -88,141 +89,142 @@ export default function CartScreen({ navigation }) {
       flex: 1,
       textAlign: 'center',
     },
+    swipeableContainer: {
+      marginBottom: 16,
+    },
     cartItem: {
-      backgroundColor: theme.background || '#fafafa',
-      borderRadius: 18,
+      backgroundColor: theme.mode === 'light' ? '#F8F9FA' : theme.background2,
+      borderRadius: 16,
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 18,
       padding: 12,
-      shadowColor: 'rgba(235, 82, 34, 0.1)',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 16,
-      elevation: 2,
+      borderWidth: 1,
+      borderColor: theme.background1,
     },
     itemImg: {
-      width: width * 0.18,
-      height: width * 0.18,
-      borderRadius: width * 0.045,
-      marginRight: width * 0.04,
+      width: 80,
+      height: 100,
+      borderRadius: 12,
+      marginRight: 15,
+      resizeMode: 'cover',
     },
     itemInfo: {
       flex: 1,
       justifyContent: 'center',
     },
+    titleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
     itemName: {
       fontWeight: 'bold',
-      fontSize: 16,
+      fontSize: 15,
       color: theme.text,
+      flex: 1,
     },
     itemDesc: {
-      color: theme.subText || '#888',
-      fontSize: 13,
-      marginBottom: 4,
+      color: theme.text1,
+      fontSize: 12,
+      marginTop: 4,
+      marginBottom: 8,
     },
-    itemPrice: {
-      color: theme.text,
-      fontWeight: 'bold',
-      fontSize: 15,
-      marginBottom: 2,
-    },
-    qtyRow: {
+    priceRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 6,
+      justifyContent: 'space-between',
+    },
+    itemPrice: {
+      color: '#FE552A',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    itemQtyBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     qtyBtn: {
       width: 28,
       height: 28,
       borderRadius: 14,
-      backgroundColor: 'rgba(254, 85, 42, 0.1)',
+      backgroundColor: theme.background1,
       alignItems: 'center',
       justifyContent: 'center',
-      marginHorizontal: 8,
     },
-    qtyText: {
-      fontWeight: 'bold',
-      fontSize: 16,
-      color: theme.text,
-      minWidth: 22,
+    qtyInput: {
+      width: 36,
+      height: 28,
       textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 15,
+      color: theme.text,
+      padding: 0,
     },
     summary: {
       marginTop: 10,
       marginBottom: 18,
-      backgroundColor: theme.background1 || '#fafafa',
+      backgroundColor: theme.mode === 'light' ? '#F8F9FA' : theme.background2,
       borderRadius: 16,
       padding: 16,
-      shadowColor: 'rgba(235, 82, 34, 0.1)',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 16,
-      elevation: 1,
+      borderWidth: 1,
+      borderColor: theme.background1,
     },
     summaryRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 8,
+      marginBottom: 12,
     },
     summaryLabel: {
-      color: theme.subText || '#888',
-      fontSize: 15,
+      color: theme.text1,
+      fontSize: 14,
+      fontWeight: '500',
     },
     summaryValue: {
       color: theme.text,
       fontWeight: 'bold',
-      fontSize: 15,
+      fontSize: 14,
     },
     totalRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginTop: 8,
       borderTopWidth: 1,
-      borderTopColor: '#eee',
-      paddingTop: 10,
+      borderTopColor: theme.background1,
+      paddingTop: 16,
     },
     totalLabel: {
       fontWeight: 'bold',
-      fontSize: 17,
+      fontSize: 16,
       color: theme.text,
+      textTransform: 'uppercase',
     },
     totalValue: {
-      fontWeight: 'bold',
-      fontSize: 17,
-      color: 'rgba(254, 85, 42, 1)',
+      fontWeight: '900',
+      fontSize: 18,
+      color: '#FE552A',
     },
     checkoutBtn: {
-      backgroundColor: '#A259FF',
-      borderRadius: 14,
+      backgroundColor: theme.text,
+      borderRadius: 12,
       paddingVertical: 16,
       alignItems: 'center',
       marginTop: 10,
       marginBottom: 20,
     },
     checkoutText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      fontSize: 18,
-    },
-    itemQtyBox: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 8,
-    },
-    qtyInput: {
-      width: 40,
-      height: 32,
-      borderWidth: 1,
-      borderColor: 'rgba(254, 85, 42, 0.2)',
-      borderRadius: 8,
-      textAlign: 'center',
+      color: theme.background,
       fontWeight: 'bold',
       fontSize: 16,
-      color: theme.text,
-      backgroundColor: theme.background,
-      marginHorizontal: 8,
-      padding: 0,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    deleteAction: {
+      backgroundColor: '#FF6B6B',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 70,
+      borderRadius: 16,
+      marginLeft: 10,
     },
   }), [theme, width]);
 
@@ -236,14 +238,87 @@ export default function CartScreen({ navigation }) {
       <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}>
         {cart.length} Món
       </Text>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {cart.length === 0 ? (
           <Text style={{ color: theme.text1 || '#888', textAlign: 'center', marginTop: 40, fontSize: 16 }}>
             Giỏ hàng của bạn đang trống.
           </Text>
         ) : (
           <View>
-            {/* Map logic for items... */}
+            {cart.map((item) => (
+              <View key={item.id} style={styles.swipeableContainer}>
+                <Swipeable
+                  renderRightActions={() => (
+                    <TouchableOpacity
+                      style={styles.deleteAction}
+                      onPress={() => removeItem(item.id)}
+                    >
+                      <Icon name="trash-2" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+                >
+                  <View style={styles.cartItem}>
+                    <Image
+                      source={{ uri: item.image || 'https://via.placeholder.com/150' }}
+                      style={styles.itemImg}
+                    />
+                    <View style={styles.itemInfo}>
+                      <View style={styles.titleRow}>
+                        <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
+                      </View>
+                      <Text style={styles.itemDesc} numberOfLines={1}>{item.desc || 'Không có mô tả'}</Text>
+                      
+                  <View style={styles.priceRow}>
+                    <Text style={styles.itemPrice}>{Number(item.price).toLocaleString('vi-VN')} đ</Text>
+                    <View style={styles.itemQtyBox}>
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQty(item.id, -1)}>
+                        <Icon name="minus" size={16} color={theme.text} />
+                      </TouchableOpacity>
+                      <TextInput
+                        style={styles.qtyInput}
+                        value={item.qty === undefined ? '' : String(item.qty)}
+                        keyboardType="number-pad"
+                        onChangeText={(text) => handleQtyInput(item.id, text)}
+                        onBlur={() => handleQtyBlur(item.id, String(item.qty))}
+                        placeholderTextColor={theme.text1}
+                      />
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQty(item.id, 1)}>
+                        <Icon name="plus" size={16} color={theme.text} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+                </Swipeable>
+              </View>
+            ))}
+
+            <View style={styles.summary}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Tổng đơn hàng</Text>
+                <Text style={styles.summaryValue}>{orderAmount.toLocaleString('vi-VN')} đ</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Thuế (Tạm tính)</Text>
+                <Text style={styles.summaryValue}>{tax.toLocaleString('vi-VN')} đ</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Giảm giá</Text>
+                <Text style={styles.summaryValue}>-{discount.toLocaleString('vi-VN')} đ</Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Tổng cộng</Text>
+                <Text style={styles.totalValue}>{total.toLocaleString('vi-VN')} đ</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.checkoutBtn}
+              activeOpacity={0.8}
+              onPress={() => Alert.alert("Thông báo", "Tính năng thanh toán đang được phát triển!")}
+            >
+              <Text style={styles.checkoutText}>Thanh toán ngay</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
