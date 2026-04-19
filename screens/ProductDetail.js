@@ -124,33 +124,155 @@ const ProductDetailScreen = () => {
   };
 
   const styles = useMemo(() => StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.background },
-    header: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
-    image: { width: '100%', height: width * 1.2, resizeMode: 'cover' },
-    content: { padding: 20, borderTopLeftRadius: 30, borderTopRightRadius: 30, backgroundColor: theme.background, marginTop: -30 },
-    titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    title: { fontSize: 24, fontWeight: 'bold', color: theme.text, flex: 1, marginRight: 10 },
-    price: { fontSize: 22, fontWeight: 'bold', color: '#FE552A' },
-    brand: { fontSize: 14, color: theme.text1, marginTop: 4, marginBottom: 12 },
-    ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-    ratingText: { fontWeight: 'bold', color: theme.text, marginLeft: 6 },
-    reviewText: { color: theme.text1, marginLeft: 4, fontSize: 13 },
-    description: { fontSize: 14, color: theme.text, lineHeight: 22, marginBottom: 20 },
-    sectionTitle: { fontSize: 16, fontWeight: 'bold', color: theme.text, marginBottom: 10 },
-    optionsRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 },
-    optionBtn: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, borderWidth: 1, marginRight: 10, marginBottom: 10 },
-    optionText: { fontWeight: 'bold', fontSize: 14 },
-    qtyRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 30 },
-    qtyBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.background1, alignItems: 'center', justifyContent: 'center' },
-    qtyText: { fontSize: 18, fontWeight: 'bold', color: theme.text, marginHorizontal: 20 },
-    addToCartBtn: { backgroundColor: '#000', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginBottom: 30 },
-    addToCartText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-    divider: { height: 1, backgroundColor: theme.background1, marginBottom: 20 },
-    reviewItem: { marginBottom: 20, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: theme.background1 },
-    reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-    reviewAuthor: { fontWeight: 'bold', color: theme.text },
-    reviewDate: { fontSize: 12, color: theme.text1 },
-    reviewComment: { color: theme.text, marginTop: 8, lineHeight: 20 },
+    container: { 
+        flex: 1, 
+        backgroundColor: theme.background 
+    },
+    header: { 
+        position: 'absolute', 
+        top: 40, 
+        left: 20, 
+        zIndex: 10 
+    },
+    image: { 
+        width: '100%', 
+        height: width * 1.2, 
+        resizeMode: 'cover' 
+    },
+    content: { 
+        padding: 20, 
+        borderTopLeftRadius: 30, 
+        borderTopRightRadius: 30, 
+        backgroundColor: theme.background, 
+        marginTop: -30 
+    },
+    titleRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start' 
+    },
+    title: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        color: theme.text, 
+        flex: 1, 
+        marginRight: 10 
+    },
+    price: { 
+        fontSize: 22, 
+        fontWeight: 'bold', 
+        color: '#FE552A' 
+    },
+    brand: { 
+        fontSize: 14, 
+        color: theme.text1, 
+        marginTop: 4, 
+        marginBottom: 12 
+    },
+    ratingRow: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        marginBottom: 16 
+    },
+    ratingText: { 
+        fontWeight: 'bold', 
+        color: theme.text, 
+        marginLeft: 6 
+    },
+    reviewText: { 
+        color: theme.text1, 
+        marginLeft: 4, 
+        fontSize: 13 
+    },
+    description: { 
+        fontSize: 14, 
+        color: theme.text, 
+        lineHeight: 22, 
+        marginBottom: 20 
+    },
+    sectionTitle: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        color: theme.text, 
+        marginBottom: 10 
+    },
+    optionsRow: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        marginBottom: 20 
+    },
+    optionBtn: { 
+        paddingVertical: 8, 
+        paddingHorizontal: 16, 
+        borderRadius: 8, 
+        borderWidth: 1, 
+        marginRight: 10, 
+        marginBottom: 10 
+    },
+    optionText: { 
+        fontWeight: 'bold', 
+        fontSize: 14 
+    },
+    qtyRow: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        marginBottom: 30 
+    },
+    qtyBtn: { 
+        width: 36, 
+        height: 36, 
+        borderRadius: 18, 
+        backgroundColor: theme.background1, 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+    },
+    qtyText: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: theme.text, 
+        marginHorizontal: 20 
+    },
+    addToCartBtn: { 
+        backgroundColor: '#000', 
+        paddingVertical: 16, 
+        borderRadius: 12, 
+        alignItems: 'center', 
+        marginBottom: 30 
+    },
+    addToCartText: { 
+        color: '#fff', 
+        fontSize: 16, 
+        fontWeight: 'bold' 
+    },
+    divider: { 
+        height: 1, 
+        backgroundColor: theme.background1, 
+        marginBottom: 20 
+    },
+    reviewItem: { 
+        marginBottom: 20, 
+        paddingBottom: 20, 
+        borderBottomWidth: 1, 
+        borderBottomColor: theme.background1 
+    },
+    reviewHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginBottom: 6 
+    },
+    reviewAuthor: { 
+        fontWeight: 'bold', 
+        color: theme.text 
+    },
+    reviewDate: { 
+        fontSize: 12, 
+        color: theme.text1 
+    },
+    reviewComment: { 
+        color: theme.text, 
+        marginTop: 8, 
+        lineHeight: 20 
+    },
   }), [theme, width]);
 
   return (
