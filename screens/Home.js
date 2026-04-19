@@ -122,7 +122,7 @@ const HomeScreen = () => {
                                 price={item.price}
                                 rating={item.rating}
                                 reviews={item.reviews}
-                                onPress={() => navigation.navigate("ProductDetail")}
+                                onPress={() => navigation.navigate("ProductDetail", { id: item.id })}
                             />
                         ))}
                     </ScrollView>

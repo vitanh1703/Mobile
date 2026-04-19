@@ -58,7 +58,7 @@ const ProductsScreen = ({ route }) => {
       price={item.price}
       rating={item.rating}
       discount={item.discount}
-      onPress={() => navigation.navigate('ProductDetail')}
+      onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
       containerStyle={{ width: ITEM_WIDTH, marginRight: 0 }}
     />
   );

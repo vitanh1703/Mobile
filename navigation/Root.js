@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTab';
 import LoginScreen from '../screens/Login';
 import RegisterScreen from '../screens/Register';
-// import AuthScreen from '../screens/Auth';
 import WelcomeScreen from '../screens/Welcome';
 
 const RootStack = createStackNavigator();
@@ -13,7 +12,6 @@ export default function RootNavigator() {
     <RootStack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Login" component={LoginScreen} />
       <RootStack.Screen name="Register" component={RegisterScreen} />
-      {/* <RootStack.Screen name="Auth" component={AuthScreen} /> */}
       <RootStack.Screen name="App" component={BottomTabNavigator} />
       <RootStack.Screen name="Welcome" component={WelcomeScreen} />
     </RootStack.Navigator>

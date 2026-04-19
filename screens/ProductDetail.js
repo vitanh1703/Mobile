@@ -10,10 +10,11 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
+import { productItems } from '../data/shopData';
 
 const { width } = Dimensions.get('window');
 

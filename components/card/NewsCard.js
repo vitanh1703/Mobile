@@ -50,14 +50,14 @@ const NewsCard = ({ id, category, title, date, img, desc }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 20,
     width: '100%',
   },
   imageContainer: {
-    height: 220,
-    borderRadius: 8,
+    height: 180,
+    borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 12,
     position: 'relative',
   },
   image: {
@@ -71,21 +71,21 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#000',
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderBottomLeftRadius: 8,
+    paddingVertical: 6,
+    borderBottomLeftRadius: 12,
   },
   dateText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
   },
   content: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
-  category: { fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8 },
-  title: { fontSize: 18, fontWeight: '900', textTransform: 'uppercase', marginBottom: 8, lineHeight: 24 },
-  desc: { fontSize: 12, fontWeight: '500', textTransform: 'uppercase', lineHeight: 18, marginBottom: 16, opacity: 0.8 },
+  category: { fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6 },
+  title: { fontSize: 16, fontWeight: '900', textTransform: 'uppercase', marginBottom: 6, lineHeight: 22 },
+  desc: { fontSize: 12, fontWeight: '500', textTransform: 'uppercase', lineHeight: 18, marginBottom: 12, opacity: 0.8 },
   readMoreContainer: { flexDirection: 'row', alignItems: 'center' },
   readMoreText: { fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1.5, marginRight: 6 },
 });
