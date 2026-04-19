@@ -17,7 +17,14 @@ const LoginScreen = () => {
   };
 
   const handleLogin = () => {
-    navigation.replace("AppDrawer");
+    // Giả lập thông tin user khi đăng nhập thành công
+    const mockUser = {
+      firstname: "H&Q",
+      lastname: "User",
+      city: "Thành phố Hồ Chí Minh",
+      avatar: "https://i.pravatar.cc/150",
+    };
+    navigation.replace("App", { user: mockUser });
   };
 
   const isDisable = !!error || !email || !password;
