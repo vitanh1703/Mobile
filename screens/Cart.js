@@ -316,21 +316,18 @@ export default function CartScreen({ navigation }) {
               style={styles.checkoutBtn}
               activeOpacity={0.8}
               onPress={() => {
-                navigation.navigate('Payment', {
-                  checkoutData: {
-                    orderCode: 'ORD-' + Math.floor(Math.random() * 1000000),
-                    items: cart.map(item => ({
-                      id: item.id,
-                      productName: item.name,
-                      size: 'M',
-                      color: '',
-                      quantity: Number(item.qty) || 1,
-                      total: item.price * (Number(item.qty) || 1),
-                      image: item.image
-                    }))
-                  },
-                  totalAmount: total,
-                  form: { fullName: 'Nguyễn Văn Khách', email: 'khachhang@gmail.com', phone: '0987654321', address: '123 Đường ABC, TP.HCM' }
+                navigation.navigate('Checkout', {
+                  selectedItems: cart.map(item => ({
+                    id: item.id,
+                    productName: item.name,
+                    size: item.size || 'M',
+                    color: item.color || '',
+                    quantity: Number(item.qty) || 1,
+                    price: item.price,
+                    total: item.price * (Number(item.qty) || 1),
+                    image: item.image
+                  })),
+                  totalFromCart: total
                 });
               }}
             >
