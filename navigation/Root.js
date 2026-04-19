@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import AppDrawer from './Drawer';
+import BottomTabNavigator from './BottomTab';
 import LoginScreen from '../screens/Login';
 // import AuthScreen from '../screens/Auth';
 import WelcomeScreen from '../screens/Welcome';
@@ -12,7 +12,7 @@ export default function RootNavigator() {
     <RootStack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
       <RootStack.Screen name="Login" component={LoginScreen} />
       {/* <RootStack.Screen name="Auth" component={AuthScreen} /> */}
-      <RootStack.Screen name="App" component={AppDrawer} />
+      <RootStack.Screen name="App" component={BottomTabNavigator} />
       <RootStack.Screen name="Welcome" component={WelcomeScreen} />
     </RootStack.Navigator>
   );

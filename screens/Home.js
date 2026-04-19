@@ -1,6 +1,6 @@
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import DealCard from "../components/card/DealCard";
@@ -16,13 +16,17 @@ const HomeScreen = () => {
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-            <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+            <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={{ paddingBottom: 80 }}>
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.titleContainer}>
-                        <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                            <Ionicons name="menu-outline" size={28} color={theme.text} />
-                        </TouchableOpacity>
+                        <View>
+                            <Image 
+                                source={require("../assets/logo.png")} 
+                                style={{ width: 36, height: 36 }} 
+                                resizeMode="contain" 
+                            />
+                        </View>
                         <Text style={[styles.title, { color: theme.text }]}>H&Q Store</Text>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
