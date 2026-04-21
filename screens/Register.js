@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions, TextInput, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiClient } from "../services/api";
 
 const { height, width } = Dimensions.get("window");
 
@@ -36,24 +37,37 @@ const RegisterScreen = () => {
     }
 
     setLoading(true);
-    
-    // Giả lập độ trễ mạng
-    setTimeout(() => {
-        setLoading(false);
-        Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn!");
-        setStep(1);
-        setCooldown(60);
-    }, 1000);
+    try {
+      await apiClient.post("/Auth/send-register-otp", {
+        fullName: `${lastname} ${name}`.trim(),
+        email: email,
+        password: password
+      });
+      Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn!");
+      setStep(1);
+      setCooldown(60);
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể gửi OTP!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async () => {
     if (!otp) return Alert.alert("Lỗi", "Vui lòng nhập OTP!");
     setLoading(true);
-    setTimeout(() => {
-        setLoading(false);
-        Alert.alert("Thành công", "Đăng ký thành công! Hãy đăng nhập nhé.");
-        navigation.navigate("Login");
-    }, 1000);
+    try {
+      await apiClient.post("/Auth/verify-register-otp", {
+        email: email,
+        otp: otp
+      });
+      Alert.alert("Thành công", "Đăng ký thành công! Hãy đăng nhập nhé.");
+      navigation.navigate("Login");
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Mã OTP không hợp lệ!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (step === 1) {
