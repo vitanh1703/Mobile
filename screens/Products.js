@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,11 +15,19 @@ const allCategories = ['Tất cả', ...clothingCategories.map(c => c.title)];
 const ProductsScreen = ({ route }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { searchQuery } = route?.params || {};
+  const { searchQuery, category } = route?.params || {};
   
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+  const [selectedCategory, setSelectedCategory] = useState(category || 'Tất cả');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
+  // Theo dõi sự thay đổi tham số category (khi bấm vào danh mục từ Home)
+  useEffect(() => {
+    if (category) {
+      setSelectedCategory(category);
+      setCurrentPage(1);
+    }
+  }, [category]);
 
   // Lọc sản phẩm theo danh mục & từ khóa tìm kiếm
   const filteredProducts = useMemo(() => {

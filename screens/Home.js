@@ -12,7 +12,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const { theme, toggleTheme } = useTheme();
+    const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
 
     const handleSearch = () => {
@@ -39,9 +39,6 @@ const HomeScreen = () => {
                         <Text style={[styles.title, { color: theme.text }]}>H&Q Store</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <TouchableOpacity onPress={toggleTheme}>
-                            <Ionicons name={theme.icon} size={28} color={theme.text} />
-                        </TouchableOpacity>
                         <TouchableOpacity style={styles.cart} onPress={() => navigation.navigate("Cart")}>
                             <Ionicons name="bag-handle-outline" size={20} color={'#fff'} style={{ padding: 5 }} />
                         </TouchableOpacity>
@@ -100,10 +97,8 @@ const HomeScreen = () => {
                                 key={item.id}
                                 title={item.title}
                                 image={item.image}
-                                onPress={() => navigation.navigate("ShopByCate", {
-                                    categoryId: item.id,
-                                    categoryName: item.title,
-                                    categoryImage: item.image,
+                                onPress={() => navigation.navigate("Products", {
+                                    category: item.title,
                                 })}
                             />
                         ))}

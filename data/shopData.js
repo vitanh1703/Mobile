@@ -10,10 +10,10 @@ export const deals = [
 ];
 
 export const clothingCategories = [
-    { id: 1, title: "Áo khoác", description: "Các loại áo unisex", image: { uri: 'https://img.icons8.com/plasticine/200/jacket.png' } },
-    { id: 2, title: "Sơ thun", description: "Sơ mi công sở và dạo phố", image: { uri: 'https://img.icons8.com/plasticine/200/t-shirt.png' } },
-    { id: 3, title: "Áo len & Áo dệt kim", description: "Quần jeans nam nữ chất lượng cao", image: { uri: 'https://img.icons8.com/plasticine/200/sweater.png' } },
-    { id: 4, title: "Phụ kiện", description: "Thắt lưng, ví da, tất và nón", image: { uri: 'https://img.icons8.com/plasticine/200/scarf.png' } }
+    { id: 1, title: "Áo khoác", description: "Các loại áo unisex", image: { uri: 'https://emojigraph.org/media/apple/coat_1f9e5.png' } },
+    { id: 2, title: "Áo thun", description: "Sơ mi công sở và dạo phố", image: { uri: 'https://emojigraph.org/media/samsung/t-shirt_1f455.png' } },
+    { id: 3, title: "Áo len & Áo dệt kim", description: "Quần jeans nam nữ chất lượng cao", image: require('../assets/icon-ao-len.jpg') },
+    { id: 4, title: "Phụ kiện", description: "Thắt lưng, ví da, tất và nón", image: { uri: 'https://img.icons8.com/fluency/200/scarf.png' } }
 ];
 
 export const productItems = [
