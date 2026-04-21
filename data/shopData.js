@@ -1,7 +1,12 @@
 export const deals = [
     { id: 1, title: "WELCOME2026", description: "Giảm 50k cho đơn hàng đầu tiên", value: 50000, type: "FixedAmount" },
     { id: 2, title: "HE10", description: "Giảm 10% cho bộ sưu tập mùa hè", value: 10, type: "Percentage" },
-    { id: 3, title: "FREESHIP", description: "Giảm 30k phí vận chuyển", value: 30000, type: "FixedAmount" }
+    { id: 3, title: "FREESHIP", description: "Giảm 30k phí vận chuyển", value: 30000, type: "FixedAmount" },
+    { id: 4, title: "THANG5", description: "Giảm 15% khi thanh toán qua ví", value: 15, type: "Percentage" },
+    { id: 5, title: "NEWBIE", description: "Giảm 20k cho khách hàng mới", value: 20000, type: "FixedAmount" },
+    { id: 6, title: "FLASH100", description: "Giảm 100k cho đơn từ 1 triệu", value: 100000, type: "FixedAmount" },
+    { id: 7, title: "VIPMEMBER", description: "Giảm 20% cho thành viên VIP", value: 20, type: "Percentage" },
+    { id: 8, title: "LIVESTREAM", description: "Giảm 40k khi mua trên live", value: 40000, type: "FixedAmount" }
 ];
 
 export const clothingCategories = [

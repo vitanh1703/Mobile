@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -15,27 +15,22 @@ const PromotionScreen = () => {
   };
 
   const renderVoucher = ({ item }) => {
-    // Xác định text hiển thị phần trăm hoặc số tiền
     const discountText = item.type === 'FixedAmount' 
         ? `${item.value / 1000}K` 
         : `${item.value}%`;
 
     return (
       <View style={styles.voucherCard}>
-        {/* Phần bên trái: Giá trị giảm */}
         <View style={styles.voucherLeft}>
           <Text style={styles.discountText}>{discountText}</Text>
           <Text style={styles.discountType}>GIẢM GIÁ</Text>
         </View>
-
-        {/* Đường cắt đứt khúc giả lập hình vé */}
         <View style={styles.dashedLineContainer}>
             {Array.from({ length: 15 }).map((_, i) => (
                 <View key={i} style={styles.dash} />
             ))}
         </View>
 
-        {/* Phần bên phải: Thông tin & Hành động */}
         <View style={styles.voucherRight}>
           <Text style={styles.voucherTitle}>{item.title}</Text>
           <Text style={styles.voucherDesc}>{item.description}</Text>
@@ -66,7 +61,7 @@ const PromotionScreen = () => {
     discountText: { color: theme.background, fontSize: 24, fontWeight: '900' },
     discountType: { color: theme.background, fontSize: 11, fontWeight: 'bold', marginTop: 4, opacity: 0.9 },
     
-    dashedLineContainer: { width: 2, height: '100%', justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: theme.text },
+    dashedLineContainer: { width: 2, paddingVertical: 10, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: theme.text },
     dash: { width: 2, height: 4, backgroundColor: theme.background },
     
     voucherRight: { flex: 1, padding: 16, justifyContent: 'center', borderTopRightRadius: 12, borderBottomRightRadius: 12 },
@@ -81,7 +76,7 @@ const PromotionScreen = () => {
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <ButtonGoBack />
         <Text style={styles.headerTitle}>Mã giảm giá</Text>
@@ -89,13 +84,14 @@ const PromotionScreen = () => {
       </View>
 
       <FlatList
+        style={{ flex: 1 }}
         data={deals}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderVoucher}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
