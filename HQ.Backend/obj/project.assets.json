@@ -3662,11 +3662,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\HQ_Clothing_Store\\HQ.Backend\\HQ.Backend.csproj",
+      "projectUniqueName": "D:\\Mobile\\HQ.Backend\\HQ.Backend.csproj",
       "projectName": "HQ.Backend",
-      "projectPath": "D:\\HQ_Clothing_Store\\HQ.Backend\\HQ.Backend.csproj",
+      "projectPath": "D:\\Mobile\\HQ.Backend\\HQ.Backend.csproj",
       "packagesPath": "C:\\Users\\diema\\.nuget\\packages\\",
-      "outputPath": "D:\\HQ_Clothing_Store\\HQ.Backend\\obj\\",
+      "outputPath": "D:\\Mobile\\HQ.Backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

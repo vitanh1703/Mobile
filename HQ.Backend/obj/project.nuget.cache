@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bzhlFTldc7Q=",
+  "dgSpecHash": "j593w8D6UFg=",
   "success": true,
-  "projectFilePath": "D:\\HQ_Clothing_Store\\HQ.Backend\\HQ.Backend.csproj",
+  "projectFilePath": "D:\\Mobile\\HQ.Backend\\HQ.Backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\diema\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\diema\\.nuget\\packages\\documentformat.openxml\\3.5.1\\documentformat.openxml.3.5.1.nupkg.sha512",
