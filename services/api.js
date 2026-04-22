@@ -48,12 +48,74 @@ export const authApi = {
 };
 
 // ================= PRODUCT =================
+const computeMinPrice = (variants) => {
+  if (!Array.isArray(variants) || variants.length === 0) return 0;
+  const prices = variants
+    .map((v) => Number(v?.price ?? v?.Price ?? 0))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  if (!prices.length) return 0;
+  return Math.min(...prices);
+};
+
+const normalizeProduct = (raw, fallback) => {
+  if (!raw || typeof raw !== "object") return fallback;
+
+  const id = raw.id ?? raw.Id ?? fallback?.id;
+  const name = raw.name ?? raw.Name ?? fallback?.name;
+  const brandText = raw.brandText ?? raw.BrandText ?? fallback?.brandText;
+  const description = raw.description ?? raw.Description ?? fallback?.description;
+  const imageUrl = raw.imageUrl ?? raw.ImageUrl ?? fallback?.imageUrl;
+  const categoryId = raw.categoryId ?? raw.CategoryId ?? fallback?.categoryId;
+
+  const rawVariants = raw.variants ?? raw.Variants;
+  const variants = Array.isArray(rawVariants)
+    ? rawVariants
+        .map((v) => {
+          if (!v || typeof v !== "object") return null;
+          const variantId = v.id ?? v.Id;
+          const color = v.color ?? v.Color;
+          const size = v.size ?? v.Size;
+          const price = Number(v.price ?? v.Price ?? 0);
+          const stockQuantity = Number(v.stockQuantity ?? v.StockQuantity ?? 0);
+          return {
+            id: variantId,
+            color,
+            size,
+            price: Number.isFinite(price) ? price : 0,
+            stockQuantity: Number.isFinite(stockQuantity) ? stockQuantity : 0,
+            sku: v.sku ?? v.Sku,
+          };
+        })
+        .filter((v) => v && v.id != null && v.color && v.size)
+    : null;
+
+  const safeVariants = variants && variants.length ? variants : fallback?.variants || [];
+
+  return {
+    id,
+    name,
+brandText,
+    description,
+    imageUrl,
+    categoryId,
+    variants: safeVariants,
+    minPrice: computeMinPrice(safeVariants),
+    _raw: raw,
+  };
+};
+
 export const productApi = {
   getAll: async (categoryId) => {
     const response = await apiClient.get("/Products", {
       params: categoryId ? { category: categoryId } : undefined,
     });
-    return response.data;
+    const list = Array.isArray(response.data) ? response.data : [];
+    return list.map((p) => normalizeProduct(p)).filter((p) => p && p.id != null);
+  },
+
+  getById: async (productId, fallback) => {
+    const response = await apiClient.get(`/Products/${productId}`);
+    return normalizeProduct(response.data, fallback);
   },
 
   getByCategory: async (categoryId) => {
@@ -106,17 +168,58 @@ export const servicesApi = {
 };
 
 // ================= PROMOTION =================
+const normalizePromotion = (raw) => {
+  if (!raw || typeof raw !== "object") return null;
+
+  const id = raw.id ?? raw.Id;
+  const title = raw.title ?? raw.code ?? raw.Code;
+  const description = raw.description ?? raw.Description ?? "";
+
+  const rawType = raw.type ?? raw.discountType ?? raw.DiscountType;
+  const typeStr = rawType != null ? String(rawType) : "";
+  const type = /percent/i.test(typeStr)
+    ? "Percentage"
+    : /fixed|amount|money|vnd|đ/i.test(typeStr)
+      ? "FixedAmount"
+      : typeStr || "FixedAmount";
+
+  const rawValue = raw.value ?? raw.discountValue ?? raw.DiscountValue;
+  let value = Number(rawValue);
+  if (!Number.isFinite(value)) value = 0;
+
+  // Nếu backend lưu % dạng 0.2 thay vì 20
+  if (type === "Percentage" && value > 0 && value <= 1) {
+    value = value * 100;
+  }
+
+  if (!title) return null;
+
+  return {
+    id,
+    title,
+    description,
+    type,
+    value,
+    // giữ thêm field gốc nếu cần debug
+    _raw: raw,
+  };
+};
+
 export const promotionsApi = {
   getAll: async () => {
-    const response = await apiClient.get("/Promotions");
-    return response.data;
+const response = await apiClient.get("/Promotions");
+
+    const list = Array.isArray(response.data) ? response.data : [];
+    return list.map(normalizePromotion).filter(Boolean);
   },
 
   validateCode: async (code) => {
     const response = await apiClient.get(
       `/Promotions/validate/${encodeURIComponent(code)}`
     );
-    return response.data;
+
+    // Endpoint validate trả về object 1 mã
+    return normalizePromotion(response.data) || response.data;
   },
 };
 

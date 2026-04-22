@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
 import { productItems } from '../data/shopData';
+import { productApi } from '../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -44,6 +45,55 @@ const mockReviewsData = {
   ],
 };
 
+const buildFallbackProduct = (id) => {
+  const item = productItems.find((p) => p.id === id);
+  if (item) {
+    return {
+      id: item.id,
+      name: item.title,
+      brandText: item.brand || 'H&Q Store',
+      description: 'Mô tả chi tiết sản phẩm. Thiết kế basic dễ phối đồ, phù hợp mặc hàng ngày.',
+      imageUrl: item.image?.uri,
+      variants: [
+        { id: parseInt(`${item.id}101`), color: 'Trắng', size: 'S', price: item.price, stockQuantity: 10 },
+        { id: parseInt(`${item.id}102`), color: 'Trắng', size: 'M', price: item.price, stockQuantity: 5 },
+        { id: parseInt(`${item.id}103`), color: 'Trắng', size: 'L', price: item.price, stockQuantity: 0 },
+        { id: parseInt(`${item.id}104`), color: 'Đen', size: 'M', price: item.price, stockQuantity: 2 },
+        { id: parseInt(`${item.id}105`), color: 'Đen', size: 'L', price: item.price, stockQuantity: 8 },
+      ],
+    };
+  }
+  return mockProduct;
+};
+
+const normalizeReviewSummary = (raw) => {
+  if (!raw || typeof raw !== 'object') return mockReviewsData;
+
+  const averageRating = Number(raw.averageRating ?? raw.AverageRating ?? 0);
+  const totalReviews = Number(raw.totalReviews ?? raw.TotalReviews ?? 0);
+  const list = Array.isArray(raw.reviews ?? raw.Reviews) ? (raw.reviews ?? raw.Reviews) : [];
+
+  const reviews = list
+    .map((r) => {
+      if (!r || typeof r !== 'object') return null;
+      const rating = Number(r.rating ?? r.Rating ?? 0);
+      return {
+        id: r.id ?? r.Id,
+        userName: r.userName ?? r.UserName ?? 'Ẩn danh',
+        rating: Number.isFinite(rating) ? rating : 0,
+        comment: r.comment ?? r.Comment ?? '',
+        createdAt: r.createdAt ?? r.CreatedAt ?? new Date().toISOString(),
+      };
+    })
+    .filter(Boolean);
+
+  return {
+    averageRating: Number.isFinite(averageRating) ? averageRating : 0,
+    totalReviews: Number.isFinite(totalReviews) ? totalReviews : reviews.length,
+    reviews,
+  };
+};
+
 const ProductDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -55,29 +105,57 @@ const ProductDetailScreen = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  // Tìm sản phẩm từ mảng dữ liệu dựa vào id truyền tới
-  const product = useMemo(() => {
-    const item = productItems.find((p) => p.id === id);
-    if (item) {
-      return {
-        id: item.id,
-        name: item.title,
-        brandText: item.brand || 'H&Q Store',
-        description: 'Mô tả chi tiết sản phẩm. Thiết kế basic dễ phối đồ, phù hợp mặc hàng ngày.',
-        imageUrl: item.image?.uri,
-        variants: [
-          { id: parseInt(`${item.id}101`), color: 'Trắng', size: 'S', price: item.price, stockQuantity: 10 },
-          { id: parseInt(`${item.id}102`), color: 'Trắng', size: 'M', price: item.price, stockQuantity: 5 },
-          { id: parseInt(`${item.id}103`), color: 'Trắng', size: 'L', price: item.price, stockQuantity: 0 }, // Hết hàng
-          { id: parseInt(`${item.id}104`), color: 'Đen', size: 'M', price: item.price, stockQuantity: 2 },
-          { id: parseInt(`${item.id}105`), color: 'Đen', size: 'L', price: item.price, stockQuantity: 8 },
-        ],
-      };
-    }
-    return mockProduct;
+  const fallbackProduct = useMemo(() => buildFallbackProduct(id), [id]);
+  const [product, setProduct] = useState(fallbackProduct);
+  const [reviewsData, setReviewsData] = useState(mockReviewsData);
+
+  useEffect(() => {
+    // reset lựa chọn khi đổi sản phẩm
+    setSelectedColor(null);
+    setSelectedSize(null);
+    setQuantity(1);
   }, [id]);
 
-  const reviewsData = mockReviewsData;
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchDetail = async () => {
+      if (!id) return;
+      try {
+        const detail = await productApi.getById(id, fallbackProduct);
+        if (mounted && detail) {
+          setProduct(detail);
+        }
+      } catch (e) {
+        // giữ fallback, không đổi UI
+      }
+    };
+
+    fetchDetail();
+    return () => {
+      mounted = false;
+    };
+  }, [id, fallbackProduct]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchReviews = async () => {
+      if (!id) return;
+      try {
+        const summary = await productApi.getReviewSummary(id);
+        const normalized = normalizeReviewSummary(summary);
+        if (mounted) setReviewsData(normalized);
+      } catch (e) {
+        // giữ mock, không đổi UI
+      }
+    };
+
+    fetchReviews();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   // Xử lý logic lọc màu sắc và kích cỡ
   const availableColors = Array.from(new Set(product.variants.map((v) => v.color)));

@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
+  ActivityIndicator,
+  Alert,
   Dimensions,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { authApi } from "../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const { height, width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -127,10 +133,30 @@ const LoginScreen = () => {
     }, 1000);
   };
 
+  const ScreenWrapper = ({ children }) => (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.safeArea}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+
   // ================= UI FORGOT =================
   if (forgotStep > 0) {
     return (
-      <View style={styles.container}>
+      <ScreenWrapper>
         <View style={styles.iconBox}>
           <Text style={styles.iconText}>H&Q</Text>
         </View>
@@ -224,13 +250,13 @@ const LoginScreen = () => {
         >
           <Text style={styles.linkText}>Quay lại đăng nhập</Text>
         </TouchableOpacity>
-      </View>
+      </ScreenWrapper>
     );
   }
 
   // ================= UI LOGIN =================
   return (
-    <View style={styles.container}>
+    <ScreenWrapper>
       <View style={styles.iconBox}>
         <Text style={styles.iconText}>H&Q</Text>
       </View>
@@ -305,17 +331,22 @@ const LoginScreen = () => {
           Chưa có tài khoản? <Text style={styles.linkText}>Đăng ký ngay</Text>
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScreenWrapper>
   );
 };
 
 // ================= STYLE =================
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    paddingTop: height * 0.15,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 40,
     backgroundColor: "#fff",
   },
   iconBox: {
