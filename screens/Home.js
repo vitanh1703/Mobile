@@ -1,19 +1,48 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Image } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Image, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import DealCard from "../components/card/DealCard";
 import CategoryCard from "../components/card/CategoryCard";
 import ProductCard from "../components/card/ProductCard";
 
-import { deals, clothingCategories, productItems } from "../data/shopData";
 import { useTheme } from "../context/ThemeContext";
+import { useCategories, useProducts, usePromotions } from "../services/hooks";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
+    
+    const { promotions, loading: promoLoading, error: promoError } = usePromotions();
+    const { categories, loading: catLoading, error: catError } = useCategories();
+    const { products, loading: productsLoading, error: productsError } = useProducts(undefined);
+    const dealsToRender = promotions?.length ? promotions.slice(0, 5) : [];
+
+    const categoriesToRender = useMemo(() => {
+        const list = Array.isArray(categories) && categories.length ? categories : [];
+        if (!list || list.length === 0) return [];
+
+        return list
+            .map((c) => {
+                const id = c?.id ?? c?.Id;
+                const name = c?.name ?? c?.Name;
+                if (id == null || !name) return null;
+
+                return {
+                    id,
+                    title: name,
+                    image: require("../assets/logo.png"),
+                };
+            })
+            .filter(Boolean);
+    }, [categories]);
+
+    const popularProducts = useMemo(() => {
+        if (!Array.isArray(products) || products.length === 0) return [];
+        return products.slice(0, 10);
+    }, [products]);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
@@ -72,57 +101,107 @@ const HomeScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10 }}>
-                        {deals.map((deal, index) => {
-                            const discountText = deal.type === 'FixedAmount' ? `-${deal.value / 1000}K` : `-${deal.value}%`;
-                            return (
-                                <DealCard
-                                    key={index}
-                                    code={deal.title}
-                                    title="ƯU ĐÃI ĐẶC BIỆT"
-                                    description={deal.description}
-                                    discountText={discountText}
-                                    onPress={() => console.log(`${deal.title} pressed`)}
-                                />
-                            );
-                        })}
+                        {promoLoading ? (
+                            <View style={{ height: 120, justifyContent: 'center', paddingHorizontal: 20 }}>
+                                <ActivityIndicator color={theme.text} size="small" />
+                            </View>
+                        ) : promoError ? (
+                            <Text style={{ color: '#ff0000', fontSize: 12, padding: 10 }}>Lỗi tải khuyến mãi</Text>
+                        ) : promotions?.length > 0 ? (
+                            promotions.slice(0, 5).map((deal, index) => {
+                                const discountText = deal.type === 'FixedAmount' ? `-${deal.value / 1000}K` : `-${deal.value}%`;
+                                return (
+                                    <DealCard
+                                        key={deal.id || index}
+                                        code={deal.title}
+                                        title="ƯU ĐÃI ĐẶC BIỆC"
+                                        description={deal.description}
+                                        discountText={discountText}
+                                        onPress={() => console.log(`${deal.title} pressed`)}
+                                    />
+                                );
+                            })
+                        ) : (
+                            <Text style={{ color: theme.text1, fontSize: 12, padding: 10 }}>Không có khuyến mãi</Text>
+                        )}
                     </ScrollView>
                 </View>
 
                 {/* Categories */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: theme.text }]}>Danh mục</Text>
-                    <View style={styles.categoriesContainer}>
-                        {clothingCategories.map((item) => (
-                            <CategoryCard
-                                key={item.id}
-                                title={item.title}
-                                image={item.image}
-                                onPress={() => navigation.navigate("Products", {
-                                    category: item.title,
-                                })}
-                            />
-                        ))}
-                    </View>
+                    {catLoading ? (
+                        <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
+                            <ActivityIndicator color={theme.text} />
+                        </View>
+                    ) : catError ? (
+                        <Text style={{ color: '#ff0000', fontSize: 12, textAlign: 'center' }}>Lỗi tải danh mục</Text>
+                    ) : categoriesToRender?.length > 0 ? (
+                        <View style={styles.categoriesContainer}>
+                            {categoriesToRender.map((item) => (
+                                <CategoryCard
+                                    key={item.id}
+                                    title={item.title}
+                                    image={item.image}
+                                    onPress={() => navigation.navigate("Products", {
+                                        categoryId: item.id,
+                                        categoryName: item.title,
+                                    })}
+                                />
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={{ color: theme.text1, fontSize: 12, textAlign: 'center' }}>Không có danh mục</Text>
+                    )}
                 </View>
 
                 {/* Popular Products */}
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: theme.text }]}>Sản phẩm phổ biến</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {productItems.map((item) => (
-                            <ProductCard
-                                key={item.id}
-                                image={item.image}
-                                discount={item.discount}
-                                title={item.title}
-                                brand={item.brand}
-                                price={item.price}
-                                rating={item.rating}
-                                reviews={item.reviews}
-                                onPress={() => navigation.navigate("ProductDetail", { id: item.id })}
-                            />
-                        ))}
-                    </ScrollView>
+                    {productsLoading ? (
+                        <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
+                            <ActivityIndicator color={theme.text} />
+                        </View>
+                    ) : productsError ? (
+                        <Text style={{ color: '#ff0000', fontSize: 12, textAlign: 'center', paddingVertical: 20 }}>Lỗi tải sản phẩm</Text>
+                    ) : popularProducts?.length > 0 ? (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {popularProducts.map((item) => {
+                                const id = item?.id ?? item?.Id;
+                                const title = item?.name ?? item?.Name;
+                                const brand = item?.brandText ?? item?.BrandText ?? "H&Q";
+
+                                const variants = item?.variants ?? item?.Variants;
+                                const minVariantPrice =
+                                    Array.isArray(variants) && variants.length
+                                        ? Math.min(
+                                              ...variants
+                                                  .map((v) => Number(v?.price ?? v?.Price ?? 0))
+                                                  .filter((n) => Number.isFinite(n) && n > 0)
+                                          )
+                                        : 0;
+                                const price = item?.minPrice ?? item?.price ?? minVariantPrice;
+
+                                const rawImageUrl = item?.imageUrl ?? item?.ImageUrl;
+                                const image = rawImageUrl
+                                    ? { uri: rawImageUrl }
+                                    : require("../assets/logo.png");
+
+                                return (
+                                    <ProductCard
+                                        key={id}
+                                        image={image}
+                                        title={title}
+                                        brand={brand}
+                                        price={Number(price) || 0}
+                                        onPress={() => navigation.navigate("ProductDetail", { id })}
+                                    />
+                                );
+                            })}
+                        </ScrollView>
+                    ) : (
+                        <Text style={{ color: theme.text1, fontSize: 12, textAlign: 'center', paddingVertical: 20 }}>Không có sản phẩm</Text>
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>

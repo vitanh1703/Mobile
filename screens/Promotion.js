@@ -3,12 +3,15 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { usePromotions } from '../services/hooks';
 import ButtonGoBack from '../components/ButtonGoBack';
 import { deals } from '../data/shopData';
 
 const PromotionScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { promotions } = usePromotions();
+  const voucherList = promotions?.length ? promotions : deals;
 
   const handleCopyCode = (code) => {
     Alert.alert('Thành công', `Đã sao chép mã: ${code}`);
@@ -85,8 +88,8 @@ const PromotionScreen = () => {
 
       <FlatList
         style={{ flex: 1 }}
-        data={deals}
-        keyExtractor={(item) => item.id.toString()}
+        data={voucherList}
+        keyExtractor={(item, index) => (item?.id != null ? item.id.toString() : index.toString())}
         renderItem={renderVoucher}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
