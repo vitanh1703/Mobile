@@ -9,65 +9,19 @@ import {
   Dimensions,
   Alert,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
-import { productItems } from '../data/shopData';
 import { productApi } from '../services/api';
 import { useCart } from '../services/hooks';
 
 const { width } = Dimensions.get('window');
 
-// --- DỮ LIỆU TĨNH (STATIC MOCK DATA) ---
-const mockProduct = {
-  id: 1,
-  name: 'AIRism Cotton Áo Thun',
-  brandText: 'H&Q Store',
-  description: 'Áo thun cotton AIRism mềm mại, thoáng mát, thấm hút mồ hôi tốt. Thiết kế basic dễ phối đồ, phù hợp mặc hàng ngày.',
-  imageUrl: 'https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/465185/item/vngoods_17_465185_3x4.jpg',
-  variants: [
-    { id: 101, color: 'Trắng', size: 'S', price: 230000, stockQuantity: 10 },
-    { id: 102, color: 'Trắng', size: 'M', price: 230000, stockQuantity: 5 },
-    { id: 103, color: 'Trắng', size: 'L', price: 230000, stockQuantity: 0 }, // Hết hàng
-    { id: 104, color: 'Đen', size: 'M', price: 250000, stockQuantity: 2 },
-    { id: 105, color: 'Đen', size: 'L', price: 250000, stockQuantity: 8 },
-  ],
-};
-
-const mockReviewsData = {
-  averageRating: 4.8,
-  totalReviews: 24,
-  reviews: [
-    { id: 1, userName: 'Nguyễn Văn A', rating: 5, comment: 'Áo mặc rất mát, vải đẹp. Sẽ ủng hộ shop thêm!', createdAt: '2024-03-15T00:00:00.000Z' },
-    { id: 2, userName: 'Trần Thị B', rating: 4, comment: 'Form hơi rộng so với size bình thường, nhưng chất lượng tốt.', createdAt: '2024-03-10T00:00:00.000Z' },
-  ],
-};
-
-const buildFallbackProduct = (id) => {
-  const item = productItems.find((p) => p.id === id);
-  if (item) {
-    return {
-      id: item.id,
-      name: item.title,
-      brandText: item.brand || 'H&Q Store',
-      description: 'Mô tả chi tiết sản phẩm. Thiết kế basic dễ phối đồ, phù hợp mặc hàng ngày.',
-      imageUrl: item.image?.uri,
-      variants: [
-        { id: parseInt(`${item.id}101`), color: 'Trắng', size: 'S', price: item.price, stockQuantity: 10 },
-        { id: parseInt(`${item.id}102`), color: 'Trắng', size: 'M', price: item.price, stockQuantity: 5 },
-        { id: parseInt(`${item.id}103`), color: 'Trắng', size: 'L', price: item.price, stockQuantity: 0 },
-        { id: parseInt(`${item.id}104`), color: 'Đen', size: 'M', price: item.price, stockQuantity: 2 },
-        { id: parseInt(`${item.id}105`), color: 'Đen', size: 'L', price: item.price, stockQuantity: 8 },
-      ],
-    };
-  }
-  return mockProduct;
-};
-
 const normalizeReviewSummary = (raw) => {
-  if (!raw || typeof raw !== 'object') return mockReviewsData;
+  if (!raw || typeof raw !== 'object') return { averageRating: 0, totalReviews: 0, reviews: [] };
 
   const averageRating = Number(raw.averageRating ?? raw.AverageRating ?? 0);
   const totalReviews = Number(raw.totalReviews ?? raw.TotalReviews ?? 0);
@@ -105,9 +59,9 @@ const ProductDetailScreen = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  const fallbackProduct = useMemo(() => buildFallbackProduct(id), [id]);
-  const [product, setProduct] = useState(fallbackProduct);
-  const [reviewsData, setReviewsData] = useState(mockReviewsData);
+  const [product, setProduct] = useState(null);
+  const [reviewsData, setReviewsData] = useState({ averageRating: 0, totalReviews: 0, reviews: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // reset lựa chọn khi đổi sản phẩm
@@ -119,135 +73,30 @@ const ProductDetailScreen = () => {
   useEffect(() => {
     let mounted = true;
 
-    const fetchDetail = async () => {
+    const fetchData = async () => {
       if (!id) return;
+      setLoading(true);
       try {
-        const detail = await productApi.getById(id, fallbackProduct);
+        const detail = await productApi.getById(id);
         if (mounted && detail) {
           setProduct(detail);
         }
-      } catch (e) {
-        // giữ fallback, không đổi UI
-      }
-    };
-
-    fetchDetail();
-    return () => {
-      mounted = false;
-    };
-  }, [id, fallbackProduct]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchReviews = async () => {
-      if (!id) return;
-      try {
+        
         const summary = await productApi.getReviewSummary(id);
         const normalized = normalizeReviewSummary(summary);
         if (mounted) setReviewsData(normalized);
       } catch (e) {
-        // giữ mock, không đổi UI
+        console.error("Lỗi tải chi tiết sản phẩm:", e);
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
 
-    fetchReviews();
+    fetchData();
     return () => {
       mounted = false;
     };
   }, [id]);
-
-  // Xử lý logic lọc màu sắc và kích cỡ
-  const availableColors = Array.from(new Set(product.variants.map((v) => v.color)));
-  const allSizes = Array.from(new Set(product.variants.map((v) => v.size)));
-
-  const availableSizes = selectedColor
-    ? product.variants.filter((v) => v.color === selectedColor).map((v) => v.size)
-    : allSizes;
-
-  const selectedVariant = selectedColor && selectedSize
-    ? product.variants.find((v) => v.color === selectedColor && v.size === selectedSize)
-    : null;
-
-  const currentPrice = selectedVariant ? selectedVariant.price : product.variants[0].price;
-
-  // Xử lý thay đổi số lượng
-  const handleQuantity = (type) => {
-    if (type === 'plus') {
-      const maxStock = selectedVariant ? selectedVariant.stockQuantity : 99;
-      if (quantity < maxStock) setQuantity((q) => q + 1);
-      else if (selectedVariant && quantity >= maxStock) Alert.alert("Thông báo", "Đã đạt giới hạn tồn kho!");
-    } else if (quantity > 1) {
-      setQuantity((q) => q - 1);
-    }
-  };
-
-  // Thêm vào giỏ hàng
-  const handleAddToCart = async () => {
-    if (!selectedColor || !selectedSize) {
-      Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
-      return;
-    }
-    if (!selectedVariant || selectedVariant.stockQuantity < 1) {
-      Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
-      return;
-    }
-
-    try {
-      await addToCart(selectedVariant.id, quantity);
-      Alert.alert('Thành công', 'Đã thêm vào giỏ hàng!', [
-        { text: 'Tiếp tục mua sắm' },
-        { text: 'Đến giỏ hàng', onPress: () => navigation.navigate('Cart') }
-      ]);
-    } catch (error) {
-      Alert.alert('Lỗi', error.message || 'Không thể thêm vào giỏ hàng!');
-    }
-  };
-
-  // Mua ngay
-  const handleBuyNow = () => {
-    if (!selectedColor || !selectedSize) {
-      Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
-      return;
-    }
-    if (!selectedVariant || selectedVariant.stockQuantity < 1) {
-      Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
-      return;
-    }
-
-    const itemToBuy = {
-      id: selectedVariant.id,
-      productName: product.name,
-      size: selectedSize,
-      color: selectedColor,
-      quantity: quantity,
-      price: selectedVariant.price,
-      total: selectedVariant.price * quantity,
-      image: product.imageUrl
-    };
-
-    navigation.navigate('Checkout', {
-      selectedItems: [itemToBuy],
-      totalFromCart: itemToBuy.total
-    });
-  };
-
-  // Hàm vẽ ngôi sao
-  const renderStars = (rating) => {
-    const stars = [];
-    const rounded = Math.round(rating);
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Ionicons
-          key={i}
-          name={i <= rounded ? 'star' : 'star-outline'}
-          size={16}
-          color="#FFD700"
-        />
-      );
-    }
-    return stars;
-  };
 
   const styles = useMemo(() => StyleSheet.create({
     container: { 
@@ -417,6 +266,116 @@ const ProductDetailScreen = () => {
         lineHeight: 20 
     },
   }), [theme, width]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <View style={styles.header}><ButtonGoBack /></View>
+        <ActivityIndicator size="large" color={theme.text} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!product || !product.variants || product.variants.length === 0) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <View style={styles.header}><ButtonGoBack /></View>
+        <Text style={{ color: theme.text }}>Không tìm thấy sản phẩm hoặc sản phẩm chưa có biến thể.</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Xử lý logic lọc màu sắc và kích cỡ
+  const availableColors = Array.from(new Set(product.variants.map((v) => v.color)));
+  const allSizes = Array.from(new Set(product.variants.map((v) => v.size)));
+
+  const availableSizes = selectedColor
+    ? product.variants.filter((v) => v.color === selectedColor).map((v) => v.size)
+    : allSizes;
+
+  const selectedVariant = selectedColor && selectedSize
+    ? product.variants.find((v) => v.color === selectedColor && v.size === selectedSize)
+    : null;
+
+  const currentPrice = selectedVariant ? selectedVariant.price : product.variants[0].price;
+
+  // Xử lý thay đổi số lượng
+  const handleQuantity = (type) => {
+    if (type === 'plus') {
+      const maxStock = selectedVariant ? selectedVariant.stockQuantity : 99;
+      if (quantity < maxStock) setQuantity((q) => q + 1);
+      else if (selectedVariant && quantity >= maxStock) Alert.alert("Thông báo", "Đã đạt giới hạn tồn kho!");
+    } else if (quantity > 1) {
+      setQuantity((q) => q - 1);
+    }
+  };
+
+  // Thêm vào giỏ hàng
+  const handleAddToCart = async () => {
+    if (!selectedColor || !selectedSize) {
+      Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
+      return;
+    }
+    if (!selectedVariant || selectedVariant.stockQuantity < 1) {
+      Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
+      return;
+    }
+
+    try {
+      await addToCart(selectedVariant.id, quantity);
+      Alert.alert('Thành công', 'Đã thêm vào giỏ hàng!', [
+        { text: 'Tiếp tục mua sắm' },
+        { text: 'Đến giỏ hàng', onPress: () => navigation.navigate('Cart') }
+      ]);
+    } catch (error) {
+      Alert.alert('Lỗi', error.message || 'Không thể thêm vào giỏ hàng!');
+    }
+  };
+
+  // Mua ngay
+  const handleBuyNow = () => {
+    if (!selectedColor || !selectedSize) {
+      Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
+      return;
+    }
+    if (!selectedVariant || selectedVariant.stockQuantity < 1) {
+      Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
+      return;
+    }
+
+    const itemToBuy = {
+      id: selectedVariant.id,
+      productName: product.name,
+      size: selectedSize,
+      color: selectedColor,
+      quantity: quantity,
+      price: selectedVariant.price,
+      total: selectedVariant.price * quantity,
+      image: product.imageUrl
+    };
+
+    navigation.navigate('Checkout', {
+      selectedItems: [itemToBuy],
+      totalFromCart: itemToBuy.total
+    });
+  };
+
+  // Hàm vẽ ngôi sao
+  const renderStars = (rating) => {
+    const stars = [];
+    const rounded = Math.round(rating);
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Ionicons
+          key={i}
+          name={i <= rounded ? 'star' : 'star-outline'}
+          size={16}
+          color="#FFD700"
+        />
+      );
+    }
+    return stars;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
