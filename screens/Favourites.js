@@ -211,7 +211,11 @@ const FavouritesScreen = () => {
         ) : wishlistItems.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Danh sách yêu thích của bạn hiện đang trống.</Text>
-            <TouchableOpacity style={styles.exploreBtn} onPress={() => navigation.navigate('Products')}>
+            <TouchableOpacity 
+              style={styles.exploreBtn} 
+              activeOpacity={0.8} 
+              onPress={() => navigation.navigate('ProductsTab', { categoryId: null, categoryName: 'Tất cả' })}
+            >
               <Text style={styles.exploreBtnText}>Khám phá sản phẩm</Text>
             </TouchableOpacity>
           </View>
