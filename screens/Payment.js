@@ -50,7 +50,13 @@ const PaymentScreen = () => {
 
   const handleFinish = () => {
     Alert.alert("Cảm ơn bạn!", "Đơn hàng sẽ được xử lý sau khi chúng tôi xác nhận thanh toán.", [
-        { text: "Về trang chủ", onPress: () => navigation.navigate("HomeTab") }
+        { 
+          text: "Về trang chủ", 
+          onPress: () => navigation.reset({
+            index: 0,
+            routes: [{ name: 'App' }]
+          }) 
+        }
     ]);
   };
 

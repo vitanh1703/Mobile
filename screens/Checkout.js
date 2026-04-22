@@ -1,9 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert, SafeAreaView } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
+import { promotionsApi, orderApi } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkoutController } from '../services/controller';
 
 const CheckoutScreen = () => {
   const navigation = useNavigation();
@@ -19,68 +22,118 @@ const CheckoutScreen = () => {
     phone: '',
     address: '',
   });
+  const [user, setUser] = useState(null);
 
   const [promoCode, setPromoCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('bank'); // bank | vnpay | cod
+  const [loadingPromo, setLoadingPromo] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        setUser(u);
+        setForm({
+          fullName: u.fullName || u.full_name || '',
+          email: u.email || '',
+          phone: u.phone || '',
+          address: u.address || '',
+        });
+      }
+    };
+    loadUser();
+  }, []);
 
   const shippingCost = 0;
   const totalAfterDiscount = Math.max(0, totalFromCart - discountAmount + shippingCost);
 
   // Hàm giả lập áp dụng mã giảm giá
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
     const code = promoCode.trim().toUpperCase();
     if (!code) {
       Alert.alert('Lỗi', 'Vui lòng nhập mã giảm giá.');
       return;
     }
     
-    // Giả lập logic kiểm tra mã
-    if (code === 'WELCOME2026') {
-      setDiscountAmount(50000);
-      Alert.alert('Thành công', 'Áp dụng mã giảm giá 50.000đ thành công!');
-    } else if (code === 'FREESHIP') {
-      setDiscountAmount(30000);
-      Alert.alert('Thành công', 'Áp dụng mã giảm giá 30.000đ thành công!');
-    } else {
+    setLoadingPromo(true);
+    try {
+      const promo = await promotionsApi.validateCode(code);
+      if (!promo) throw new Error("Mã giảm giá không hợp lệ.");
+      
+      let discount = 0;
+      if (promo.type === 'FixedAmount') {
+        discount = promo.value;
+      } else if (promo.type === 'Percentage') {
+        discount = (totalFromCart * promo.value) / 100;
+      }
+      
+      setDiscountAmount(discount);
+      Alert.alert('Thành công', 'Áp dụng mã giảm giá thành công!');
+    } catch (error) {
       setDiscountAmount(0);
-      Alert.alert('Lỗi', 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+      Alert.alert('Lỗi', error.response?.data?.message || error.message || 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+    } finally {
+      setLoadingPromo(false);
     }
   };
 
   // Hàm xử lý khi nhấn "Hoàn tất thanh toán"
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!selectedItems || selectedItems.length === 0) {
       Alert.alert('Lỗi', 'Không có sản phẩm nào để thanh toán.');
       return;
     }
 
-    if (!form.fullName || !form.email || !form.phone || !form.address) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin giao hàng!');
+    const validation = checkoutController.validateCheckout(form);
+    if (!validation.success) {
+      Alert.alert('Lỗi', validation.message);
       return;
     }
 
-    const orderCode = 'ORD-' + Math.floor(Math.random() * 1000000);
+    setPlacingOrder(true);
+    try {
+      const requestData = {
+        UserId: user?.id || null,
+        FullName: form.fullName,
+        Email: form.email,
+        Phone: form.phone,
+        Address: form.address,
+        TotalAmount: totalAfterDiscount,
+        Items: selectedItems.map(item => ({
+          VariantId: item.variantId || item.id,
+          Quantity: item.quantity,
+          PriceAtPurchase: item.price
+        }))
+      };
 
-    if (paymentMethod === 'bank') {
-      // Chuyển sang màn hình quét QR thanh toán
-      navigation.navigate('Payment', {
-        checkoutData: {
-          orderCode: orderCode,
-          id: orderCode,
-          items: selectedItems
-        },
-        totalAmount: totalAfterDiscount,
-        form
-      });
-    } else if (paymentMethod === 'cod') {
-      // Thanh toán khi nhận hàng
-      Alert.alert('Thành công', `Đã tạo đơn hàng thành công! Mã đơn: ${orderCode}. Cảm ơn bạn.`, [
-        { text: 'Về trang chủ', onPress: () => navigation.navigate('HomeTab') }
-      ]);
-    } else {
-      // VNPay (chưa hỗ trợ thực tế trong bản demo này)
-      Alert.alert('Thông báo', 'Phương thức thanh toán VNPay đang được phát triển, vui lòng chọn phương thức khác!');
+      const response = await orderApi.create(requestData);
+      const orderCode = response.orderCode;
+      const orderId = response.id;
+
+      if (paymentMethod === 'bank') {
+        navigation.navigate('Payment', {
+          checkoutData: {
+            orderCode: orderCode,
+            id: orderId,
+            items: selectedItems
+          },
+          totalAmount: totalAfterDiscount,
+          form
+        });
+      } else if (paymentMethod === 'cod') {
+        Alert.alert('Thành công', `Đã tạo đơn hàng thành công! Mã đơn: ${orderCode}. Cảm ơn bạn.`, [
+          { text: 'Về trang chủ', onPress: () => navigation.navigate('HomeTab') }
+        ]);
+      } else {
+        Alert.alert('Thông báo', 'Phương thức thanh toán VNPay đang được phát triển, vui lòng chọn phương thức khác!');
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể tạo đơn hàng. Vui lòng thử lại!");
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
@@ -190,8 +243,8 @@ const CheckoutScreen = () => {
               value={promoCode}
               onChangeText={setPromoCode}
             />
-            <TouchableOpacity style={styles.promoBtn} onPress={handleApplyPromo} activeOpacity={0.8}>
-              <Text style={styles.promoBtnText}>Áp dụng</Text>
+          <TouchableOpacity style={styles.promoBtn} onPress={handleApplyPromo} activeOpacity={0.8} disabled={loadingPromo}>
+            {loadingPromo ? <ActivityIndicator size="small" color={theme.background} /> : <Text style={styles.promoBtnText}>Áp dụng</Text>}
             </TouchableOpacity>
           </View>
           {discountAmount > 0 && (
@@ -261,8 +314,8 @@ const CheckoutScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.checkoutBtn} onPress={handlePlaceOrder} activeOpacity={0.8}>
-          <Text style={styles.checkoutText}>Hoàn tất đơn hàng</Text>
+      <TouchableOpacity style={styles.checkoutBtn} onPress={handlePlaceOrder} activeOpacity={0.8} disabled={placingOrder}>
+        {placingOrder ? <ActivityIndicator color={theme.background} /> : <Text style={styles.checkoutText}>Hoàn tất đơn hàng</Text>}
         </TouchableOpacity>
 
       </ScrollView>

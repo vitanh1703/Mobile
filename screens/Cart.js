@@ -382,6 +382,7 @@ export default function CartScreen({ navigation }) {
                 navigation.navigate('Checkout', {
                   selectedItems: cart.map(item => ({
                     id: item.id,
+                    variantId: item.variantId || item.id,
                     productName: item.name,
                     size: item.size || 'M',
                     color: item.color || '',

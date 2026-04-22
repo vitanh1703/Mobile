@@ -81,6 +81,10 @@ export const orderApi = {
     const response = await apiClient.get(`/Orders/user/${userId}`);
     return response.data;
   },
+  create: async (data) => {
+    const response = await apiClient.post(`/Orders/create`, data);
+    return response.data;
+  }
 };
 
 // ================= PRODUCT =================
