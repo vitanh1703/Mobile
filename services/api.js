@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
 
 // ================= AUTH =================
 export const authApi = {
-  login: async (loginData: any) => {
+  login: async (loginData) => {
     const response = await apiClient.post("/Auth/login", {
       Email: loginData.email,
       Password: loginData.password,
@@ -34,12 +34,12 @@ export const authApi = {
     return response.data;
   },
 
-  register: async (formData: any) => {
+  register: async (formData) => {
     const response = await apiClient.post("/Auth/register", formData);
     return response.data;
   },
 
-  googleLogin: async (idToken: string) => {
+  googleLogin: async (idToken) => {
     const response = await apiClient.post("/Auth/google-login", {
       token: idToken,
     });
@@ -49,18 +49,18 @@ export const authApi = {
 
 // ================= PRODUCT =================
 export const productApi = {
-  getAll: async (categoryId?: number) => {
+  getAll: async (categoryId) => {
     const response = await apiClient.get("/Products", {
       params: categoryId ? { category: categoryId } : undefined,
     });
     return response.data;
   },
 
-  getByCategory: async (categoryId: number) => {
+  getByCategory: async (categoryId) => {
     return productApi.getAll(categoryId);
   },
 
-  getReviewSummary: async (productId: number) => {
+  getReviewSummary: async (productId) => {
     const response = await apiClient.get(`/Products/${productId}/reviews`);
     return response.data;
   },
@@ -73,17 +73,17 @@ export const productApi = {
 
 // ================= CART =================
 export const cartApi = {
-  add: async (data: any) => {
+  add: async (data) => {
     const response = await apiClient.post("/Cart/add", data);
     return response.data;
   },
 
-  remove: async (cartItemId: number) => {
+  remove: async (cartItemId) => {
     const response = await apiClient.delete(`/Cart/remove/${cartItemId}`);
     return response.data;
   },
 
-  getCheckout: async (userId: number) => {
+  getCheckout: async (userId) => {
     const response = await apiClient.get(`/Cart/checkout/${userId}`);
     return response.data;
   },
@@ -112,7 +112,7 @@ export const promotionsApi = {
     return response.data;
   },
 
-  validateCode: async (code: string) => {
+  validateCode: async (code) => {
     const response = await apiClient.get(
       `/Promotions/validate/${encodeURIComponent(code)}`
     );
@@ -127,7 +127,7 @@ export const reviewApi = {
     return response.data;
   },
 
-  getByProduct: async (productId: number) => {
+  getByProduct: async (productId) => {
     const response = await apiClient.get(`/Reviews/product/${productId}`);
     return response.data;
   },

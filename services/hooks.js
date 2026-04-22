@@ -22,7 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email, password) => {
     const validation = authController.validateLogin(email, password);
     if (!validation.success) throw new Error(validation.message);
 
@@ -39,14 +39,14 @@ export const useAuth = () => {
       }
 
       return data;
-    } catch (err: any) {
+    } catch (err) {
       throw new Error(err.response?.data?.message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (registerData: any) => {
+  const register = async (registerData) => {
     const validation = authController.validateRegister(registerData);
     if (!validation.success) throw new Error(validation.message);
 
@@ -62,14 +62,14 @@ export const useAuth = () => {
       };
 
       return await authApi.register(formattedData);
-    } catch (err: any) {
+    } catch (err) {
       throw new Error(err.response?.data?.message || "Đăng ký thất bại");
     } finally {
       setLoading(false);
     }
   };
 
-  const loginWithGoogle = async (idToken: string) => {
+  const loginWithGoogle = async (idToken) => {
     try {
       setLoading(true);
 
@@ -81,7 +81,7 @@ export const useAuth = () => {
       }
 
       return data;
-    } catch (err: any) {
+    } catch (err) {
       throw new Error(err.response?.data?.message || "Google login thất bại");
     } finally {
       setLoading(false);
@@ -125,7 +125,7 @@ export const useAuth = () => {
 export const useCart = () => {
   const [isAdding, setIsAdding] = useState(false);
 
-  const addToCart = async (variantId: number, quantity: number) => {
+  const addToCart = async (variantId, quantity) => {
     const userStr = await AsyncStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
 
@@ -140,7 +140,7 @@ export const useCart = () => {
         variantId,
         quantity,
       });
-    } catch (err: any) {
+    } catch (err) {
       throw new Error(err.response?.data?.message || "Lỗi giỏ hàng");
     } finally {
       setIsAdding(false);
