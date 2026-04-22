@@ -385,7 +385,7 @@ const ProductDetailScreen = () => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Image source={{ uri: product.imageUrl }} style={styles.image} />
+        <Image source={{ uri: product.imageUrl || 'https://via.placeholder.com/400' }} style={styles.image} />
         
         <View style={styles.content}>
           <View style={styles.titleRow}>

@@ -26,7 +26,7 @@ const ProfileScreen = ({ route }) => {
   const [loading, setLoading] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  const avatar = user?.avatar || user?.avatar_url || user?.AvatarUrl || 'https://i.pravatar.cc/150';
+  const avatar = user?.avatarUrl || user?.AvatarUrl || user?.avatar_url || user?.avatar || 'https://i.pravatar.cc/150';
 
   useFocusEffect(
     useCallback(() => {

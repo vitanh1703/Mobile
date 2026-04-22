@@ -100,7 +100,7 @@ const normalizeProduct = (raw, fallback) => {
   const name = raw.name ?? raw.Name ?? fallback?.name;
   const brandText = raw.brandText ?? raw.BrandText ?? fallback?.brandText;
   const description = raw.description ?? raw.Description ?? fallback?.description;
-  const imageUrl = raw.imageUrl ?? raw.ImageUrl ?? fallback?.imageUrl;
+  const imageUrl = raw.imageUrl ?? raw.ImageUrl ?? raw.img_url ?? raw.imgUrl ?? fallback?.imageUrl ?? 'https://via.placeholder.com/400';
   const categoryId = raw.categoryId ?? raw.CategoryId ?? fallback?.categoryId;
 
   const rawVariants = raw.variants ?? raw.Variants;

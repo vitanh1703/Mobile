@@ -36,7 +36,8 @@ namespace HQ.Backend.Controllers
                     address = user.Address,
                     role = user.Role,
                     status = user.Status,
-                    createdAt = user.CreatedAt
+                    createdAt = user.CreatedAt,
+                    avatarUrl = user.AvatarUrl
                 });
             }
             catch (Exception ex)

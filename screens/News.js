@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,38 +6,60 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
-  SafeAreaView
+  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
 import NewsCard from '../components/card/NewsCard';
-import { newsList } from '../data/shopData';
+import { useNews } from '../services/hooks';
 
 const NewsScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { news, loading, error, refetch } = useNews();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất Cả');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
+
+  // Chuẩn hóa dữ liệu từ Backend
+  const normalizedNews = useMemo(() => {
+    if (!Array.isArray(news)) return [];
+    return news.map(item => ({
+      id: item.id || item.Id,
+      category: item.category || item.Category || 'Khác',
+      title: item.title || item.Title || '',
+      date: item.publishDate ? new Date(item.publishDate).toLocaleDateString('vi-VN') : item.publish_date ? new Date(item.publish_date).toLocaleDateString('vi-VN') : '',
+      image: item.imageUrl || item.ImageUrl || item.imgUrl || item.ImgUrl || item.img_url || item.image || 'https://via.placeholder.com/150',
+      desc: item.description || item.Description || item.desc || ''
+    }));
+  }, [news]);
+
   // Lấy danh sách các category không trùng lặp
   const categories = useMemo(() => {
-    const cats = new Set(newsList.map(item => item.category));
+    const cats = new Set(normalizedNews.map(item => item.category));
     return ['Tất Cả', ...Array.from(cats)];
-  }, []);
+  }, [normalizedNews]);
 
   // Lọc tin tức theo search & category
   const filteredNews = useMemo(() => {
-    return newsList.filter(item => {
+    return normalizedNews.filter(item => {
       const matchSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = selectedCategory === 'Tất Cả' || item.category === selectedCategory;
       return matchSearch && matchCategory;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [normalizedNews, searchTerm, selectedCategory]);
 
   const totalPages = Math.max(1, Math.ceil(filteredNews.length / itemsPerPage));
 
@@ -285,15 +307,29 @@ const NewsScreen = () => {
         renderItem={renderNewsItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} tintColor={theme.text} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Không tìm thấy tin tức</Text>
-            <TouchableOpacity 
-              onPress={() => { setSearchTerm(''); setSelectedCategory('Tất Cả'); setCurrentPage(1); }} 
-              style={styles.clearFilterBtn}
-            >
-              <Text style={styles.clearFilterText}>Xóa bộ lọc</Text>
-            </TouchableOpacity>
+            {loading ? (
+              <ActivityIndicator size="large" color={theme.text} />
+            ) : error ? (
+              <>
+                <Text style={styles.emptyText}>Lỗi tải tin tức</Text>
+                <TouchableOpacity onPress={refetch} style={styles.clearFilterBtn}>
+                   <Text style={styles.clearFilterText}>Thử lại</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.emptyText}>Không tìm thấy tin tức</Text>
+                <TouchableOpacity 
+                  onPress={() => { setSearchTerm(''); setSelectedCategory('Tất Cả'); setCurrentPage(1); }} 
+                  style={styles.clearFilterBtn}
+                >
+                  <Text style={styles.clearFilterText}>Xóa bộ lọc</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         }
         ListFooterComponent={
@@ -345,7 +381,7 @@ const NewsScreen = () => {
                 <Text style={styles.statLabel}>Số trang</Text>
               </View>
               <View style={styles.statBox}>
-                <Text style={styles.statNum}>{newsList.length}</Text>
+                <Text style={styles.statNum}>{normalizedNews.length}</Text>
                 <Text style={styles.statLabel}>Tổng cộng</Text>
               </View>
             </View>

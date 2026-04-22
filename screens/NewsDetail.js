@@ -1,20 +1,33 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
-import { newsList } from '../data/shopData';
+import { useNews } from '../services/hooks';
 
 const NewsDetailScreen = () => {
   const route = useRoute();
   const { theme } = useTheme();
   const { id } = route.params || {};
 
-  // Tìm bài viết theo ID
+  const { news, loading } = useNews();
+
+  // Tìm bài viết theo ID từ backend
   const newsItem = useMemo(() => {
-    return newsList.find(item => item.id === id) || null;
-  }, [id]);
+    const rawItem = news?.find(item => (item.id || item.Id) === id);
+    if (!rawItem) return null;
+    
+    return {
+      id: rawItem.id || rawItem.Id,
+      category: rawItem.category || rawItem.Category || 'Khác',
+      title: rawItem.title || rawItem.Title || '',
+      date: rawItem.publishDate ? new Date(rawItem.publishDate).toLocaleDateString('vi-VN') : rawItem.publish_date ? new Date(rawItem.publish_date).toLocaleDateString('vi-VN') : '',
+      image: rawItem.imageUrl || rawItem.ImageUrl || rawItem.imgUrl || rawItem.ImgUrl || rawItem.img_url || rawItem.image || 'https://via.placeholder.com/150',
+      desc: rawItem.description || rawItem.Description || rawItem.desc || '',
+      content: rawItem.content || rawItem.Content || ''
+    };
+  }, [id, news]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -111,6 +124,20 @@ const NewsDetailScreen = () => {
       lineHeight: 24,
     },
   }), [theme]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <ButtonGoBack />
+          <Text style={styles.headerText}>Đang tải...</Text>
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={theme.text} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!newsItem) {
     return (
