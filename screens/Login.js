@@ -62,6 +62,7 @@ const LoginScreen = () => {
       const user = data.user || data;
 
       if (token) {
+        await AsyncStorage.setItem("user", JSON.stringify(user));
         await AsyncStorage.setItem("token", token);
       }
 

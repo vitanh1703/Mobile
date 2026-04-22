@@ -135,16 +135,33 @@ export const productApi = {
 
 // ================= CART =================
 export const cartApi = {
+  // ================= ADD =================
   add: async (data) => {
     const response = await apiClient.post("/Cart/add", data);
     return response.data;
   },
 
+  // ================= GET CART (FIX LỖI CỦA BẠN) =================
+  get: async (userId) => {
+    const response = await apiClient.get(`/Cart/${userId}`);
+    return response.data;
+  },
+
+  // ================= UPDATE QTY =================
+  update: async (cartItemId, quantity) => {
+    const response = await apiClient.put(`/Cart/update/${cartItemId}`, {
+      quantity,
+  });
+    return response.data;
+  },
+
+  // ================= REMOVE =================
   remove: async (cartItemId) => {
     const response = await apiClient.delete(`/Cart/remove/${cartItemId}`);
     return response.data;
   },
 
+  // ================= CHECKOUT =================
   getCheckout: async (userId) => {
     const response = await apiClient.get(`/Cart/checkout/${userId}`);
     return response.data;
