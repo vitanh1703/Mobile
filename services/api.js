@@ -59,6 +59,30 @@ export const authApi = {
   },
 };
 
+// ================= USERS =================
+export const userApi = {
+  getById: async (id) => {
+    const response = await apiClient.get(`/Users/${id}`);
+    return response.data;
+  },
+  updateInfo: async (id, data) => {
+    const response = await apiClient.put(`/Users/${id}/info`, data);
+    return response.data;
+  },
+  updatePassword: async (id, data) => {
+    const response = await apiClient.put(`/Users/${id}/password`, data);
+    return response.data;
+  },
+};
+
+// ================= ORDERS =================
+export const orderApi = {
+  getByUser: async (userId) => {
+    const response = await apiClient.get(`/Orders/user/${userId}`);
+    return response.data;
+  },
+};
+
 // ================= PRODUCT =================
 const computeMinPrice = (variants) => {
   if (!Array.isArray(variants) || variants.length === 0) return 0;

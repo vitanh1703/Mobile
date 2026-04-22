@@ -17,6 +17,34 @@ namespace HQ.Backend.Controllers
             _context = context;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null) 
+                {
+                    return NotFound(new { message = "Không tìm thấy người dùng" });
+                }
+
+                return Ok(new {
+                    id = user.Id,
+                    fullName = user.FullName,
+                    email = user.Email,
+                    phone = user.Phone,
+                    address = user.Address,
+                    role = user.Role,
+                    status = user.Status,
+                    createdAt = user.CreatedAt
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy thông tin người dùng", error = ex.Message });
+            }
+        }
+
         [HttpPut("{id}/info")]
         public async Task<IActionResult> UpdateInfo(int id, [FromBody] UpdateInfoRequest request)
         {
