@@ -5,13 +5,12 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { usePromotions } from '../services/hooks';
 import ButtonGoBack from '../components/ButtonGoBack';
-import { deals } from '../data/shopData';
 
 const PromotionScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const { promotions } = usePromotions();
-  const voucherList = promotions?.length ? promotions : deals;
+  const voucherList = promotions || [];
 
   const handleCopyCode = (code) => {
     Alert.alert('Thành công', `Đã sao chép mã: ${code}`);
