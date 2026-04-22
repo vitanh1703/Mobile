@@ -23,6 +23,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
+const ScreenWrapper = ({ children }) => (
+  <SafeAreaView style={styles.safeArea}>
+    <KeyboardAvoidingView
+      style={styles.safeArea}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  </SafeAreaView>
+);
+
 const LoginScreen = () => {
   const navigation = useNavigation();
 
@@ -101,22 +121,30 @@ const LoginScreen = () => {
   const handleSendOtp = async () => {
     if (!email) return Alert.alert("Lỗi", "Vui lòng nhập email!");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await authApi.forgotPassword(email);
       Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn!");
       setForgotStep(2);
       setCooldown(60);
-    }, 1000);
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể gửi mã OTP!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async () => {
     if (!otp) return Alert.alert("Lỗi", "Vui lòng nhập OTP!");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await authApi.verifyOtp(email, otp);
       Alert.alert("Thành công", "Xác thực OTP thành công!");
       setForgotStep(3);
-    }, 1000);
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Mã OTP không hợp lệ!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async () => {
@@ -124,34 +152,18 @@ const LoginScreen = () => {
       return Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự!");
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await authApi.resetPassword(email, otp, newPassword);
       Alert.alert("Thành công", "Cập nhật mật khẩu thành công! Vui lòng đăng nhập lại.");
       setForgotStep(0);
       setOtp("");
       setNewPassword("");
-    }, 1000);
+    } catch (error) {
+      Alert.alert("Lỗi", error.response?.data?.message || "Lỗi cập nhật mật khẩu!");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const ScreenWrapper = ({ children }) => (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.safeArea}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView
-            contentContainerStyle={styles.container}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {children}
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
 
   // ================= UI FORGOT =================
   if (forgotStep > 0) {
@@ -209,7 +221,11 @@ const LoginScreen = () => {
                 <Text style={styles.buttonText}>XÁC NHẬN OTP</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity disabled={cooldown > 0 || loading} onPress={handleSendOtp}>
+          <TouchableOpacity
+            disabled={cooldown > 0 || loading}
+            onPress={handleSendOtp}
+            style={{ marginTop: 20 }}
+          >
               <Text style={styles.linkText}>{cooldown > 0 ? `Gửi lại mã (${cooldown}s)` : "Gửi lại mã OTP"}</Text>
             </TouchableOpacity>
           </>

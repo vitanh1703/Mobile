@@ -9,6 +9,7 @@ import ProductCard from "../components/card/ProductCard";
 
 import { useTheme } from "../context/ThemeContext";
 import { useCategories, useProducts, usePromotions } from "../services/hooks";
+import { clothingCategories } from "../data/shopData";
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -25,15 +26,23 @@ const HomeScreen = () => {
         if (!list || list.length === 0) return [];
 
         return list
-            .map((c) => {
+            .map((c, index) => {
                 const id = c?.id ?? c?.Id;
                 const name = c?.name ?? c?.Name;
                 if (id == null || !name) return null;
 
+                const matchedCategory = clothingCategories.find(item => item.id === id || item.title.toLowerCase() === name.toLowerCase());
+                const fallbackIcons = [
+                    { uri: 'https://img.icons8.com/fluency/200/jacket.png' },
+                    { uri: 'https://img.icons8.com/fluency/200/t-shirt.png' },
+                    { uri: 'https://img.icons8.com/fluency/200/jeans.png' },
+                    { uri: 'https://img.icons8.com/fluency/200/scarf.png' }
+                ];
+
                 return {
                     id,
                     title: name,
-                    image: require("../assets/logo.png"),
+                    image: matchedCategory?.image || fallbackIcons[index % fallbackIcons.length],
                 };
             })
             .filter(Boolean);
