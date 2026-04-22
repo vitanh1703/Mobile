@@ -1,15 +1,60 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, SafeAreaView } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, SafeAreaView, Modal, TextInput, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userApi } from '../services/api';
+
+const { width } = Dimensions.get('window');
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
   const { theme, toggleTheme } = useTheme();
 
   const isDarkMode = theme.mode === 'dark';
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin!');
+    }
+    if (newPassword !== confirmNewPassword) {
+      return Alert.alert('Lỗi', 'Mật khẩu mới không khớp!');
+    }
+    if (newPassword.length < 6) {
+      return Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự.');
+    }
+
+    setLoading(true);
+    try {
+      const userStr = await AsyncStorage.getItem('user');
+      if (!userStr) throw new Error('Vui lòng đăng nhập lại!');
+      const user = JSON.parse(userStr);
+
+      await userApi.updatePassword(user.id, {
+        CurrentPassword: currentPassword,
+        NewPassword: newPassword,
+      });
+
+      Alert.alert('Thành công', 'Cập nhật mật khẩu thành công!');
+      setShowChangePassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    } catch (error) {
+      console.error("Lỗi khi đổi mật khẩu:", error);
+      Alert.alert('Lỗi', error.response?.data?.message || error.message || 'Đổi mật khẩu thất bại!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -74,6 +119,49 @@ const SettingsScreen = () => {
       color: '#fff',
       fontSize: 16,
       fontWeight: 'bold',
+    },
+    // Modal
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    modalContent: {
+      width: width * 0.9,
+      backgroundColor: theme.background,
+      borderRadius: 16,
+      padding: 20,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.text,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    inputGroup: { marginBottom: 15 },
+    label: { fontSize: 14, fontWeight: '600', color: theme.text, marginBottom: 8, marginLeft: 4 },
+    inputBox: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.background1, borderRadius: 12, paddingHorizontal: 15, backgroundColor: theme.mode === 'light' ? '#F8F9FA' : theme.background2 },
+    input: { flex: 1, paddingVertical: 14, paddingHorizontal: 10, fontSize: 16, color: theme.text },
+    modalButton: {
+      backgroundColor: theme.text,
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    modalButtonText: {
+      color: theme.background,
+      fontWeight: 'bold',
+      fontSize: 15,
+    },
+    modalCloseButton: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      padding: 5,
+      zIndex: 10,
     }
   }), [theme]);
 
@@ -88,7 +176,7 @@ const SettingsScreen = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tài khoản</Text>
-          <TouchableOpacity style={styles.item} onPress={() => {}}>
+          <TouchableOpacity style={styles.item} onPress={() => setShowChangePassword(true)}>
             <View style={styles.itemLeft}>
               <Icon name="lock" size={22} color={theme.text} />
               <Text style={styles.itemText}>Đổi mật khẩu</Text>
@@ -128,6 +216,68 @@ const SettingsScreen = () => {
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Change Password Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showChangePassword}
+        onRequestClose={() => setShowChangePassword(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setShowChangePassword(false)}>
+              <Icon name="x" size={24} color={theme.text} />
+            </TouchableOpacity>
+
+            <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Mật khẩu hiện tại</Text>
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.input}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  secureTextEntry
+                  placeholder="Nhập mật khẩu hiện tại"
+                  placeholderTextColor={theme.text1}
+                />
+              </View>
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Mật khẩu mới</Text>
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.input}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry
+                  placeholder="Nhập mật khẩu mới"
+                  placeholderTextColor={theme.text1}
+                />
+              </View>
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Xác nhận mật khẩu mới</Text>
+              <View style={styles.inputBox}>
+                <TextInput
+                  style={styles.input}
+                  value={confirmNewPassword}
+                  onChangeText={setConfirmNewPassword}
+                  secureTextEntry
+                  placeholder="Nhập lại mật khẩu mới"
+                  placeholderTextColor={theme.text1}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.modalButton} onPress={handleChangePassword} disabled={loading}>
+              {loading ? <ActivityIndicator color={theme.background} /> : <Text style={styles.modalButtonText}>XÁC NHẬN</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

@@ -7,7 +7,6 @@ import WelcomeScreen from '../screens/Welcome';
 import SettingsScreen from '../screens/Settings';
 import LogoutScreen from '../screens/Logout';
 import ProductDetailScreen from '../screens/ProductDetail';
-import WalletScreen from '../screens/Wallet';
 import CartScreen from '../screens/Cart';
 import PaymentScreen from '../screens/Payment';
 import CheckoutScreen from '../screens/Checkout';
@@ -26,7 +25,6 @@ export default function RootNavigator() {
       <RootStack.Screen name="Settings" component={SettingsScreen} />
       <RootStack.Screen name="Logout" component={LogoutScreen} />
       <RootStack.Screen name="ProductDetail" component={ProductDetailScreen} />
-      <RootStack.Screen name="Wallet" component={WalletScreen} />
       <RootStack.Screen name="Cart" component={CartScreen} />
       <RootStack.Screen name="Payment" component={PaymentScreen} />
       <RootStack.Screen name="Checkout" component={CheckoutScreen} />

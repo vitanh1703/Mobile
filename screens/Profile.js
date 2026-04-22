@@ -1,33 +1,106 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions, TextInput, Alert, ActivityIndicator } from 'react-native';
-import { Feather as Icon, MaterialIcons as MaterialIcon, FontAwesome } from '@expo/vector-icons';
+import { Feather as Icon, MaterialIcons as MaterialIcon } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ButtonGoBack from '../components/ButtonGoBack';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userApi, orderApi } from '../services/api';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const ProfileScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { user } = route?.params || {};
+  const { user: initialUser } = route?.params || {};
   const { theme } = useTheme();
 
-  // Sử dụng state gộp cho Tên để tránh lỗi khi gõ dấu cách
-  const [fullName, setFullName] = useState(`${user?.firstname || 'New'} ${user?.lastname || 'User'}`.trim());
+  const [user, setUser] = useState(initialUser || {});
+
+  // Edit profile state
+  const [fullName, setFullName] = useState(user?.fullName || `${user?.firstname || ''} ${user?.lastname || ''}`.trim());
   const [email, setEmail] = useState(user?.email || 'email@example.com');
-  const [phoneNumber, setPhoneNumber] = useState(user?.phone || 'N/A');
-  const [isLoading, setIsLoading] = useState(false);
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [address, setAddress] = useState(user?.address || '');
 
-  const avatar = user?.avatar || 'https://i.pravatar.cc/150';
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
-  const updateUserProfile = () => {
-    setIsLoading(true);
-    
-    // Giả lập độ trễ mạng khi cập nhật dữ liệu tĩnh (1 giây)
-    setTimeout(() => {
-      setIsLoading(false);
+  const avatar = user?.avatar || user?.avatar_url || user?.AvatarUrl || 'https://i.pravatar.cc/150';
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        let currentUserId = user?.id || initialUser?.id;
+        
+        if (!currentUserId) {
+          const userStr = await AsyncStorage.getItem('user');
+          if (userStr) {
+            const parsedUser = JSON.parse(userStr);
+            currentUserId = parsedUser.id;
+          }
+        }
+
+        if (!currentUserId) {
+          setLoadingOrders(false);
+          return;
+        }
+
+        // Kéo thông tin User mới nhất
+        try {
+          const latestUser = await userApi.getById(currentUserId);
+          setUser((prev) => ({ ...prev, ...latestUser }));
+          setFullName(latestUser.fullName || '');
+          setEmail(latestUser.email || 'email@example.com');
+          setPhone(latestUser.phone || '');
+          setAddress(latestUser.address || '');
+          await AsyncStorage.setItem('user', JSON.stringify(latestUser));
+        } catch (error) {
+          console.error("Lỗi khi tải thông tin user:", error);
+        }
+
+        // Kéo lịch sử mua hàng
+        setLoadingOrders(true);
+        try {
+          const userOrders = await orderApi.getByUser(currentUserId);
+          setOrders(Array.isArray(userOrders) ? userOrders : []);
+        } catch (error) {
+          console.error("Lỗi khi tải lịch sử mua hàng:", error);
+        } finally {
+          setLoadingOrders(false);
+        }
+      };
+
+      fetchData();
+    }, [])
+  );
+
+  const handleUpdateProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await userApi.updateInfo(user.id, {
+        FullName: fullName,
+        Phone: phone,
+        Address: address,
+      });
+
+      const updatedUser = res.user;
+
+      // Update user state in the app and AsyncStorage
+      const newUserState = { ...user, ...updatedUser };
+      setUser(newUserState);
+      setFullName(newUserState.fullName);
+      setPhone(newUserState.phone);
+      setAddress(newUserState.address);
+      await AsyncStorage.setItem('user', JSON.stringify(newUserState));
+
       Alert.alert('Thành công', 'Cập nhật thông tin thành công!');
-    }, 1000);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật thông tin:", error);
+      Alert.alert('Lỗi', error.response?.data?.message || 'Không thể cập nhật thông tin.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Sử dụng useMemo để ngăn việc tạo lại stylesheet không cần thiết khi re-render
@@ -56,14 +129,9 @@ const ProfileScreen = ({ route }) => {
     avatarContainer: { position: 'relative' },
     avatar: { width: 110, height: 110, borderRadius: 55, borderWidth: 2, borderColor: theme.background1 },
     editAvatarBtn: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#000000', width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: theme.background },
-    name: { fontSize: 24, fontWeight: 'bold', color: theme.text, marginTop: 15 },
+    name: { fontSize: 24, fontWeight: 'bold', color: theme.text, marginTop: 15, textAlign: 'center' },
     joinedText: { fontSize: 14, color: theme.text1, marginTop: 4 },
     
-    walletCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.text, padding: 18, borderRadius: 16, marginHorizontal: 20, marginBottom: 25, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5 },
-    walletInfo: { flex: 1, marginLeft: 15 },
-    walletTitle: { fontSize: 13, color: theme.background, opacity: 0.8, marginBottom: 4 },
-    walletBalance: { fontSize: 18, fontWeight: 'bold', color: theme.background },
-
     formContainer: { paddingHorizontal: 20 },
     inputGroup: { marginBottom: 20 },
     label: { fontSize: 14, fontWeight: '600', color: theme.text, marginBottom: 8, marginLeft: 4 },
@@ -72,13 +140,49 @@ const ProfileScreen = ({ route }) => {
     
     saveButton: { backgroundColor: theme.text, borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 15, marginBottom: 25 },
     saveButtonText: { color: theme.background, fontWeight: 'bold', fontSize: 16, letterSpacing: 0.5 },
-    
-    socialTitle: { fontSize: 16, fontWeight: 'bold', marginTop: 10, marginBottom: 15, color: theme.text, marginLeft: 4 },
-    socialCard: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.background1, borderRadius: 12, padding: 15, marginBottom: 12, backgroundColor: theme.mode === 'light' ? '#F8F9FA' : theme.background2 },
-    socialText: { fontSize: 16, color: theme.text, flex: 1, marginLeft: 15, fontWeight: '500' },
-    connectText: { color: '#000000', fontWeight: 'bold', fontSize: 14 },
-    connectedText: { color: '#0fc70f', fontWeight: 'bold', fontSize: 14 },
+
+    // Order History
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: theme.text, marginBottom: 15, marginLeft: 4 },
+    orderItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.mode === 'light' ? '#F8F9FA' : theme.background2,
+      padding: 15,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.background1,
+    },
+    orderCode: { fontSize: 14, fontWeight: 'bold', color: theme.text, marginBottom: 4 },
+    orderDate: { fontSize: 12, color: theme.text1 },
+    orderTotal: { fontSize: 14, fontWeight: 'bold', color: '#EF4444', marginBottom: 4 },
+    orderStatus: {
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 10,
+      fontSize: 10,
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      overflow: 'hidden',
+      textAlign: 'center',
+    },
   }), [theme]);
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'Pending':
+        return { backgroundColor: '#FEF3C7', color: '#92400E' };
+      case 'Success':
+        return { backgroundColor: '#D1FAE5', color: '#065F46' };
+      case 'Shipping':
+        return { backgroundColor: '#DBEAFE', color: '#1E40AF' };
+      case 'Cancel':
+        return { backgroundColor: '#FEE2E2', color: '#991B1B' };
+      default:
+        return { backgroundColor: theme.background1, color: theme.text1 };
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -91,7 +195,7 @@ const ProfileScreen = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Avatar & Info */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
@@ -100,19 +204,9 @@ const ProfileScreen = ({ route }) => {
               <Icon name="camera" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>{fullName || 'Khách hàng mới'}</Text>
+          <Text style={styles.name}>{user.fullName || fullName || 'Khách hàng mới'}</Text>
           <Text style={styles.joinedText}>Thành viên H&Q Store</Text>
         </View>
-
-      {/* Wallet Shortcut */}
-      <TouchableOpacity style={styles.walletCard} activeOpacity={0.8} onPress={() => navigation.navigate('Wallet')}>
-        <Icon name="credit-card" size={28} color={theme.background} />
-        <View style={styles.walletInfo}>
-          <Text style={styles.walletTitle}>Ví H&Q</Text>
-          <Text style={styles.walletBalance}>1.250.000 đ</Text>
-        </View>
-        <Icon name="chevron-right" size={24} color={theme.background} />
-      </TouchableOpacity>
 
         {/* Form Editable */}
         <View style={styles.formContainer}>
@@ -135,12 +229,10 @@ const ProfileScreen = ({ route }) => {
             <View style={styles.inputBox}>
               <MaterialIcon name="email" size={20} color={theme.text1} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.background1, color: theme.text1 }]}
                 value={email}
-                onChangeText={setEmail}
+                editable={false}
                 placeholder="Nhập email"
-                keyboardType="email-address"
-                autoCapitalize="none"
                 placeholderTextColor={theme.text1}
               />
             </View>
@@ -152,37 +244,66 @@ const ProfileScreen = ({ route }) => {
               <Icon name="phone" size={20} color={theme.text1} />
               <TextInput
                 style={styles.input}
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                value={phone}
+                onChangeText={setPhone}
                 placeholder="Nhập số điện thoại"
                 keyboardType="phone-pad"
                 placeholderTextColor={theme.text1}
               />
             </View>
           </View>
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Địa chỉ</Text>
+            <View style={styles.inputBox}>
+              <Icon name="map-pin" size={20} color={theme.text1} />
+              <TextInput
+                style={styles.input}
+                value={address}
+                onChangeText={setAddress}
+                placeholder="Nhập địa chỉ"
+                placeholderTextColor={theme.text1}
+              />
+            </View>
+          </View>
 
-          {/* Save Button */}
-          <TouchableOpacity style={styles.saveButton} onPress={updateUserProfile} disabled={isLoading} activeOpacity={0.8}>
-            {isLoading ? (
+          {/* Action Buttons */}
+          <TouchableOpacity style={styles.saveButton} onPress={handleUpdateProfile} disabled={loading} activeOpacity={0.8}>
+            {loading ? (
               <ActivityIndicator color={theme.background} />
             ) : (
-              <Text style={styles.saveButtonText}>LƯU THAY ĐỔI</Text>
+              <Text style={styles.saveButtonText}>LƯU</Text>
             )}
           </TouchableOpacity>
 
-          {/* Social Accounts */}
-          <Text style={styles.socialTitle}>Liên kết mạng xã hội</Text>
-          <TouchableOpacity style={styles.socialCard} activeOpacity={0.7}>
-            <FontAwesome name="facebook" size={24} color="#1877F2" />
-            <Text style={styles.socialText}>Facebook</Text>
-            <Text style={styles.connectText}>Liên kết</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.socialCard} activeOpacity={0.7}>
-            <Image source={{ uri: "https://img.icons8.com/color/48/000000/google-logo.png" }} style={{ width: 24, height: 24 }} />
-            <Text style={styles.socialText}>Google</Text>
-            <Text style={styles.connectedText}>Đã liên kết</Text>
-          </TouchableOpacity>
+          {/* Order History */}
+          <View style={{ marginTop: 10 }}>
+            <Text style={styles.sectionTitle}>Lịch sử mua hàng</Text>
+            {loadingOrders ? (
+              <ActivityIndicator color={theme.text} style={{ marginVertical: 20 }} />
+            ) : orders.length === 0 ? (
+              <Text style={{ color: theme.text1, textAlign: 'center', fontStyle: 'italic' }}>Chưa có đơn hàng nào.</Text>
+            ) : (
+              orders.map(order => {
+                const statusStyle = getStatusStyle(order.status);
+                const statusText = order.status === 'Pending' ? 'Chờ xử lý' : order.status === 'Success' ? 'Thành công' : order.status === 'Shipping' ? 'Đang giao' : order.status === 'Cancel' ? 'Đã hủy' : order.status;
+                return (
+                  <View key={order.id} style={styles.orderItem}>
+                    <View>
+                      <Text style={styles.orderCode}>{order.orderCode || `#${order.id}`}</Text>
+                      <Text style={styles.orderDate}>{new Date(order.orderDate).toLocaleDateString('vi-VN')}</Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={styles.orderTotal}>{(order.totalAmount || 0).toLocaleString('vi-VN')}đ</Text>
+                      <Text style={[styles.orderStatus, { backgroundColor: statusStyle.backgroundColor, color: statusStyle.color }]}>
+                        {statusText}
+                      </Text>
+                    </View>
+                  </View>
+                )
+              })
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>

@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { usePromotions } from '../services/hooks';
 import ButtonGoBack from '../components/ButtonGoBack';
@@ -9,8 +9,14 @@ import ButtonGoBack from '../components/ButtonGoBack';
 const PromotionScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { promotions } = usePromotions();
+  const { promotions, loading, error, refetch } = usePromotions();
   const voucherList = promotions || [];
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
 
   const handleCopyCode = (code) => {
     Alert.alert('Thành công', `Đã sao chép mã: ${code}`);
@@ -47,6 +53,32 @@ const PromotionScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+      </View>
+    );
+  };
+
+  const renderEmpty = () => {
+    if (loading) {
+      return (
+        <View style={{ marginTop: 50, alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={theme.text} />
+          <Text style={{ marginTop: 10, color: theme.text1 }}>Đang tải mã giảm giá...</Text>
+        </View>
+      );
+    }
+    if (error) {
+      return (
+        <View style={{ marginTop: 50, alignItems: 'center' }}>
+          <Text style={{ color: '#EF4444', marginBottom: 10 }}>Lỗi tải dữ liệu</Text>
+          <TouchableOpacity onPress={refetch} style={{ padding: 10, backgroundColor: theme.text, borderRadius: 8 }}>
+            <Text style={{ color: theme.background }}>Thử lại</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={{ marginTop: 50, alignItems: 'center' }}>
+        <Text style={{ color: theme.text1 }}>Hiện tại chưa có mã giảm giá nào.</Text>
       </View>
     );
   };
@@ -92,6 +124,10 @@ const PromotionScreen = () => {
         renderItem={renderVoucher}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmpty}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={refetch} colors={[theme.text]} tintColor={theme.text} />
+        }
       />
     </View>
   );
