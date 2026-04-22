@@ -141,7 +141,7 @@ const HomeScreen = () => {
                                         title="ƯU ĐÃI ĐẶC BIỆC"
                                         description={deal.description}
                                         discountText={discountText}
-                                        onPress={() => console.log(`${deal.title} pressed`)}
+                                        onPress={() => navigation.navigate("Promotion")}
                                     />
                                 );
                             })

@@ -48,7 +48,8 @@ const CheckoutScreen = () => {
   }, []);
 
   const shippingCost = 0;
-  const totalAfterDiscount = Math.max(0, totalFromCart - discountAmount + shippingCost);
+  const taxAmount = totalFromCart * 0.08;
+  const totalAfterDiscount = Math.max(0, totalFromCart + taxAmount - discountAmount + shippingCost);
 
   // Hàm giả lập áp dụng mã giảm giá
   const handleApplyPromo = async () => {
@@ -301,6 +302,10 @@ const CheckoutScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Phí vận chuyển</Text>
             <Text style={styles.summaryValue}>{shippingCost === 0 ? 'Miễn phí' : `${shippingCost.toLocaleString('vi-VN')}đ`}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Thuế (8%)</Text>
+            <Text style={styles.summaryValue}>{taxAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           {discountAmount > 0 && (
             <View style={styles.summaryRow}>

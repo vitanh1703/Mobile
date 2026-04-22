@@ -125,7 +125,7 @@ export default function CartScreen({ navigation }) {
 
   // Tính tổng
   const orderAmount = cart.reduce((sum, item) => sum + item.price * (Number(item.qty) || 0), 0);
-  const tax = orderAmount > 0 ? 3 : 0; // Chỉ tính thuế nếu có sản phẩm
+  const tax = orderAmount > 0 ? orderAmount * 0.08 : 0; // Tính thuế 8%
   const discount = 0;
   const total = orderAmount > 0 ? orderAmount + tax - discount : 0;
 
@@ -362,7 +362,7 @@ export default function CartScreen({ navigation }) {
                 <Text style={styles.summaryValue}>{orderAmount.toLocaleString('vi-VN')} đ</Text>
               </View>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Thuế (Tạm tính)</Text>
+              <Text style={styles.summaryLabel}>Thuế (8%)</Text>
                 <Text style={styles.summaryValue}>{tax.toLocaleString('vi-VN')} đ</Text>
               </View>
               <View style={styles.summaryRow}>
@@ -391,7 +391,7 @@ export default function CartScreen({ navigation }) {
                     total: item.price * (Number(item.qty) || 1),
                     image: item.image
                   })),
-                  totalFromCart: total
+                  totalFromCart: orderAmount
                 });
               }}
             >

@@ -110,18 +110,7 @@ const LoginScreen = () => {
 
   // ================= GOOGLE MOCK =================
   const handleGoogleLogin = () => {
-    setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      const mockUser = {
-        id: 1,
-        firstname: "Google",
-        lastname: "User",
-      };
-      await AsyncStorage.setItem("user", JSON.stringify(mockUser));
-      Alert.alert("Thành công", "Đăng nhập Google!");
-      navigation.replace("App", { user: mockUser });
-    }, 1000);
+    Alert.alert("Thông báo", "Tính năng đăng nhập bằng Google đang được cấu hình và sẽ sớm ra mắt!");
   };
 
   // ================= FORGOT PASSWORD =================
