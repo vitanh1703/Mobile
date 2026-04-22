@@ -71,7 +71,17 @@ export default function CartScreen({ navigation }) {
     if (itemIndex === -1) return;
     const item = cart[itemIndex];
     const newQty = (Number(item.qty) || 0) + delta;
-    if (newQty < 1) return;
+    if (newQty < 1) {
+      Alert.alert(
+        "Xóa sản phẩm",
+        "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?",
+        [
+          { text: "Hủy", style: "cancel" },
+          { text: "Xóa", onPress: () => removeItem(id), style: "destructive" }
+        ]
+      );
+      return;
+    }
 
     const newCart = [...cart];
     newCart[itemIndex] = { ...item, qty: newQty };
