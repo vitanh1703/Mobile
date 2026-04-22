@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,59 +8,70 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
+import { wishlistApi } from '../services/api';
 
 const { width } = Dimensions.get('window');
-
-// --- DỮ LIỆU TĨNH GIẢ LẬP ---
-const mockWishlist = [
-  {
-    id: 1,
-    productId: 12,
-    name: 'AIRism Cotton Áo Thun',
-    sku: 'VN-465185',
-    color: 'Trắng',
-    size: 'M',
-    price: 230000,
-    image: 'https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/465185/item/vngoods_17_465185_3x4.jpg',
-    description: 'Áo thun cotton AIRism mềm mại, thoáng mát, thấm hút mồ hôi tốt.',
-  },
-  {
-    id: 2,
-    productId: 2,
-    name: 'AirSense Áo Khoác Wool-like',
-    sku: 'VN-468671',
-    color: 'Đen',
-    size: 'L',
-    price: 250000,
-    image: 'https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/468671/item/vngoods_05_468671_3x4.jpg',
-    description: 'Áo khoác nhẹ, dễ di chuyển, phù hợp công sở.',
-  },
-];
 
 const FavouritesScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const { addToCart } = useCart();
 
-  const [wishlistItems, setWishlistItems] = useState(mockWishlist);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
+  const fetchWishlist = async () => {
+    try {
+      setLoading(true);
+      const data = await wishlistApi.getAll();
+      // Map kết quả API về đúng format của UI hiện tại
+      const formattedData = data.map(item => ({
+        id: item.id,
+        variantId: item.variantId || item.variant?.id,
+        productId: item.variant?.productId || item.productId,
+        name: item.variant?.product?.name || item.name || 'Sản phẩm',
+        sku: item.variant?.sku || item.sku || 'N/A',
+        color: item.variant?.color || item.color || '',
+        size: item.variant?.size || item.size || '',
+        price: item.variant?.price || item.price || 0,
+        image: item.variant?.product?.imageUrl || item.image || 'https://via.placeholder.com/150',
+      }));
+      setWishlistItems(formattedData);
+    } catch (error) {
+      console.log('Lỗi khi tải danh sách yêu thích:', error);
+      Alert.alert('Lỗi', 'Không thể tải danh sách yêu thích!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Xoá khỏi danh sách yêu thích
-  const handleRemoveFavorite = (id) => {
-    setWishlistItems((prev) => prev.filter((item) => item.id !== id));
-    // Dùng Alert thay cho Toast trên Web
-    Alert.alert('Thành công', 'Đã xóa khỏi danh sách yêu thích');
+  const handleRemoveFavorite = async (id) => {
+    try {
+      await wishlistApi.remove(id);
+      setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+      Alert.alert('Thành công', 'Đã xóa khỏi danh sách yêu thích');
+    } catch (error) {
+      console.log('Lỗi khi xoá yêu thích:', error);
+      Alert.alert('Lỗi', 'Không thể xoá khỏi danh sách yêu thích!');
+    }
   };
 
   // Thêm vào giỏ hàng
   const handleAddToCart = (item) => {
     addToCart({
-      id: item.id,
+      id: item.variantId || item.id,
       name: `${item.name} - ${item.color} / ${item.size}`,
       desc: `SKU: ${item.sku}`,
       price: item.price,
@@ -193,10 +204,14 @@ const FavouritesScreen = () => {
       <Text style={styles.subHeader}>Bạn đang có {wishlistItems.length} món đồ</Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        {wishlistItems.length === 0 ? (
+        {loading ? (
+          <View style={styles.emptyContainer}>
+            <ActivityIndicator size="large" color={theme.text} />
+          </View>
+        ) : wishlistItems.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Danh sách yêu thích của bạn hiện đang trống.</Text>
-            <TouchableOpacity style={styles.exploreBtn} onPress={() => navigation.navigate('Home')}>
+            <TouchableOpacity style={styles.exploreBtn} onPress={() => navigation.navigate('Products')}>
               <Text style={styles.exploreBtnText}>Khám phá sản phẩm</Text>
             </TouchableOpacity>
           </View>

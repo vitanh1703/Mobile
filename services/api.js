@@ -1,10 +1,8 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// 🔥 BASE URL (máy thật)
-const API_BASE = "http://172.20.10.2:5257/api";
+const API_BASE = "http://10.227.16.159:5257/api";
 
-// ✅ Tạo axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE,
   headers: {
@@ -12,7 +10,6 @@ export const apiClient = axios.create({
   },
 });
 
-// ✅ Tự động gắn token vào header
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("token");
@@ -43,6 +40,21 @@ export const authApi = {
     const response = await apiClient.post("/Auth/google-login", {
       token: idToken,
     });
+    return response.data;
+  },
+
+  forgotPassword: async (email) => {
+    const response = await apiClient.post("/Auth/forgot-password", { email });
+    return response.data;
+  },
+
+  verifyOtp: async (email, otp) => {
+    const response = await apiClient.post("/Auth/verify-otp", { email, otp });
+    return response.data;
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    const response = await apiClient.post("/Auth/reset-password", { email, otp, newPassword });
     return response.data;
   },
 };
