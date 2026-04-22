@@ -13,9 +13,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
 import { wishlistApi } from '../services/api';
+import { useCart } from '../services/hooks';
 
 const { width } = Dimensions.get('window');
 
@@ -69,16 +69,16 @@ const FavouritesScreen = () => {
   };
 
   // Thêm vào giỏ hàng
-  const handleAddToCart = (item) => {
-    addToCart({
-      id: item.variantId || item.id,
-      name: `${item.name} - ${item.color} / ${item.size}`,
-      desc: `SKU: ${item.sku}`,
-      price: item.price,
-      image: item.image,
-      qty: 1,
-    });
-    Alert.alert('Thành công', `Đã thêm "${item.name}" vào giỏ hàng!`);
+  const handleAddToCart = async (item) => {
+    try {
+      await addToCart(item.variantId || item.id, 1);
+      Alert.alert('Thành công', `Đã thêm "${item.name}" vào giỏ hàng!`, [
+        { text: 'Tiếp tục' },
+        { text: 'Đến giỏ hàng', onPress: () => navigation.navigate('Cart') }
+      ]);
+    } catch (error) {
+      Alert.alert('Lỗi', error.message || 'Không thể thêm vào giỏ hàng');
+    }
   };
 
   const styles = useMemo(() => StyleSheet.create({

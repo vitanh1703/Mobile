@@ -13,12 +13,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
 import { productItems } from '../data/shopData';
 import { productApi } from '../services/api';
-import { cartApi } from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCart } from '../services/hooks';
 
 const { width } = Dimensions.get('window');
 
@@ -184,52 +182,28 @@ const ProductDetailScreen = () => {
     }
   };
 
+  // Thêm vào giỏ hàng
   const handleAddToCart = async () => {
     if (!selectedColor || !selectedSize) {
       Alert.alert('Lỗi', 'Vui lòng chọn màu sắc và kích cỡ!');
       return;
     }
-
     if (!selectedVariant || selectedVariant.stockQuantity < 1) {
       Alert.alert('Lỗi', 'Sản phẩm này hiện đang hết hàng!');
       return;
     }
 
     try {
-      // Lấy thông tin user từ storage (khóa "user" chứa cả object)
-      const userStr = await AsyncStorage.getItem('user');
-
-      if (!userStr) {
-        Alert.alert('Lỗi', 'Vui lòng đăng nhập!');
-        navigation.navigate('Login');
-        return;
-      }
-
-      const user = JSON.parse(userStr);
-      const payload = {
-        userId: user.id,
-        variantId: selectedVariant.id,
-        quantity: quantity,
-      };
-
-      // console.log("SEND CART:", payload);
-
-      const res = await cartApi.add(payload);
-
-    Alert.alert('Thành công', res?.message || 'Đã thêm vào giỏ hàng!', [
-      { text: 'OK' },
-      { text: 'Đến giỏ hàng', onPress: () => navigation.navigate('Cart') }
-    ]);
-
+      await addToCart(selectedVariant.id, quantity);
+      Alert.alert('Thành công', 'Đã thêm vào giỏ hàng!', [
+        { text: 'Tiếp tục mua sắm' },
+        { text: 'Đến giỏ hàng', onPress: () => navigation.navigate('Cart') }
+      ]);
     } catch (error) {
-      console.log('Add cart error:', error?.response?.data || error.message);
-
-      Alert.alert(
-        'Lỗi',
-        error?.response?.data?.message || 'Không thể thêm vào giỏ hàng'
-      );
+      Alert.alert('Lỗi', error.message || 'Không thể thêm vào giỏ hàng!');
     }
-};
+  };
+
   // Mua ngay
   const handleBuyNow = () => {
     if (!selectedColor || !selectedSize) {

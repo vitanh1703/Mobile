@@ -1,4 +1,4 @@
-﻿using HQ.Backend.Data;
+﻿﻿using HQ.Backend.Data;
 using HQ.Backend.DTOs;
 using HQ.Backend.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +12,11 @@ namespace HQ.Backend.Controllers
     public class CartController : ControllerBase
     {
         private readonly AppDbContext _context;
+
+        public class UpdateQtyRequest
+        {
+            public int Quantity { get; set; }
+        }
 
         public CartController(AppDbContext context) { _context = context; }
 
@@ -143,6 +148,26 @@ namespace HQ.Backend.Controllers
                 },
                 items = cartData.Items
             });
+        }
+
+        [HttpPut("update/{cartItemId}")]
+        public async Task<IActionResult> UpdateCartItem(int cartItemId, [FromBody] UpdateQtyRequest request)
+        {
+            var cartItem = await _context.CartItems.FindAsync(cartItemId);
+            if (cartItem == null)
+                return NotFound(new { message = "Sản phẩm trong giỏ hàng không tồn tại!" });
+
+            if (request.Quantity < 1)
+                return BadRequest(new { message = "Số lượng không hợp lệ!" });
+
+            var variant = await _context.ProductVariants.FindAsync(cartItem.VariantId);
+            if (variant != null && variant.StockQuantity < request.Quantity)
+                return BadRequest(new { message = "Số lượng trong kho không đủ!" });
+
+            cartItem.Quantity = request.Quantity;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Cập nhật số lượng thành công!" });
         }
 
         [HttpDelete("remove/{cartItemId}")]
