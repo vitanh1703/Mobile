@@ -1,13 +1,14 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Image, ActivityIndicator } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 import DealCard from "../components/card/DealCard";
 import CategoryCard from "../components/card/CategoryCard";
 import ProductCard from "../components/card/ProductCard";
 
 import { useTheme } from "../context/ThemeContext";
+import { wishlistApi } from "../services/api";
 import { useCategories, useProducts, usePromotions } from "../services/hooks";
 import { clothingCategories } from "../data/shopData";
 
@@ -20,6 +21,20 @@ const HomeScreen = () => {
     const { categories, loading: catLoading, error: catError } = useCategories();
     const { products, loading: productsLoading, error: productsError } = useProducts(undefined);
     const dealsToRender = promotions?.length ? promotions.slice(0, 5) : [];
+    const [wishlist, setWishlist] = useState([]);
+
+    useFocusEffect(
+        useCallback(() => {
+            wishlistApi.getAll().then(data => setWishlist(data)).catch(() => {});
+        }, [])
+    );
+
+    const handleFavoriteToggle = useCallback((variantId, isFav) => {
+        setWishlist(prev => {
+            if (isFav) return [...prev, { variantId }];
+            return prev.filter(w => w.variantId !== variantId);
+        });
+    }, []);
 
     const categoriesToRender = useMemo(() => {
         const list = Array.isArray(categories) && categories.length ? categories : [];
@@ -195,6 +210,8 @@ const HomeScreen = () => {
                                 const image = rawImageUrl
                                     ? { uri: rawImageUrl }
                                     : require("../assets/logo.png");
+                                const variantId = Array.isArray(variants) && variants.length > 0 ? (variants[0]?.id ?? variants[0]?.Id) : null;
+                                const isFav = wishlist.some((w) => w.variantId === variantId);
 
                                 return (
                                     <ProductCard
@@ -204,6 +221,9 @@ const HomeScreen = () => {
                                         brand={brand}
                                         price={Number(price) || 0}
                                         onPress={() => navigation.navigate("ProductDetail", { id })}
+                                        variantId={variantId}
+                                        initialFavorite={isFav}
+                                        onFavoriteToggle={handleFavoriteToggle}
                                     />
                                 );
                             })}

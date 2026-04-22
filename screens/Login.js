@@ -84,6 +84,10 @@ const LoginScreen = () => {
       if (token) {
         await AsyncStorage.setItem("token", token);
       }
+      
+      if (user) {
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+      }
 
       setLoading(false);
 
@@ -106,12 +110,14 @@ const LoginScreen = () => {
   // ================= GOOGLE MOCK =================
   const handleGoogleLogin = () => {
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setLoading(false);
       const mockUser = {
+        id: 1,
         firstname: "Google",
         lastname: "User",
       };
+      await AsyncStorage.setItem("user", JSON.stringify(mockUser));
       Alert.alert("Thành công", "Đăng nhập Google!");
       navigation.replace("App", { user: mockUser });
     }, 1000);

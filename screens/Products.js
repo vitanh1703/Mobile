@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
 import ButtonGoBack from "../components/ButtonGoBack";
+import { wishlistApi } from "../services/api";
 import ProductCard from "../components/card/ProductCard";
 import { useCategories, useProducts } from "../services/hooks";
 
@@ -24,6 +25,20 @@ const ProductsScreen = ({ route }) => {
   const { searchQuery, categoryId, categoryName } = route?.params || {};
 
   const { categories } = useCategories();
+
+  const [wishlist, setWishlist] = useState([]);
+  useFocusEffect(
+    useCallback(() => {
+      wishlistApi.getAll().then(data => setWishlist(data)).catch(() => {});
+    }, [])
+  );
+
+  const handleFavoriteToggle = useCallback((variantId, isFav) => {
+    setWishlist(prev => {
+      if (isFav) return [...prev, { variantId }];
+      return prev.filter(w => w.variantId !== variantId);
+    });
+  }, []);
 
   const normalizedCategories = useMemo(() => {
     const list = Array.isArray(categories) ? categories : [];
@@ -115,6 +130,9 @@ const ProductsScreen = ({ route }) => {
     const name = item?.name ?? item?.Name;
     const brandText = item?.brandText ?? item?.BrandText ?? "H&Q";
     const minPrice = item?.minPrice ?? item?.MinPrice ?? 0;
+    const variants = item?.variants ?? item?.Variants;
+    const variantId = Array.isArray(variants) && variants.length > 0 ? (variants[0]?.id ?? variants[0]?.Id) : null;
+    const isFav = wishlist.some((w) => w.variantId === variantId);
 
     return (
       <ProductCard
@@ -124,6 +142,9 @@ const ProductsScreen = ({ route }) => {
         price={Number(minPrice) || 0}
         onPress={() => navigation.navigate("ProductDetail", { id })}
         containerStyle={{ width: ITEM_WIDTH, marginRight: 0 }}
+        variantId={variantId}
+        initialFavorite={isFav}
+        onFavoriteToggle={handleFavoriteToggle}
       />
     );
   };
@@ -367,4 +388,3 @@ const ProductsScreen = ({ route }) => {
 };
 
 export default ProductsScreen;
-

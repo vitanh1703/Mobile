@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { wishlistApi } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
-const ProductCard = ({ image, discount, title, brand, price, rating, reviews, onPress, containerStyle }) => {
+const ProductCard = ({ image, discount, title, brand, price, rating, reviews, onPress, containerStyle, variantId, initialFavorite = false, onFavoriteToggle }) => {
   const { theme } = useTheme();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialFavorite);
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  useEffect(() => {
+    setIsFavorite(initialFavorite);
+  }, [initialFavorite]);
+
+  const toggleFavorite = async () => {
+    if (!variantId) {
+      Alert.alert("Thông báo", "Sản phẩm này chưa có biến thể để thêm vào yêu thích.");
+      return;
+    }
+
+    const previousState = isFavorite;
+    setIsFavorite(!isFavorite); // Cập nhật giao diện trước (Optimistic UI)
+
+    try {
+      if (previousState) {
+        await wishlistApi.remove(variantId);
+        if (onFavoriteToggle) onFavoriteToggle(variantId, false);
+      } else {
+        await wishlistApi.add(variantId);
+        if (onFavoriteToggle) onFavoriteToggle(variantId, true);
+      }
+    } catch (error) {
+      setIsFavorite(previousState); // Khôi phục nếu có lỗi
+      Alert.alert("Lỗi", error.message || "Không thể cập nhật danh sách yêu thích.");
+    }
   };
 
   return (

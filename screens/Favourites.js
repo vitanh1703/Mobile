@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import ButtonGoBack from '../components/ButtonGoBack';
@@ -27,13 +27,14 @@ const FavouritesScreen = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchWishlist();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchWishlist();
+    }, [])
+  );
 
   const fetchWishlist = async () => {
     try {
-      setLoading(true);
       const data = await wishlistApi.getAll();
       // Map kết quả API về đúng format của UI hiện tại
       const formattedData = data.map(item => ({
@@ -50,7 +51,6 @@ const FavouritesScreen = () => {
       setWishlistItems(formattedData);
     } catch (error) {
       console.log('Lỗi khi tải danh sách yêu thích:', error);
-      Alert.alert('Lỗi', 'Không thể tải danh sách yêu thích!');
     } finally {
       setLoading(false);
     }

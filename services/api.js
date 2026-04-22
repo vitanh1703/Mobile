@@ -248,6 +248,68 @@ export const reviewApi = {
   },
 };
 
+// ================= WISHLIST =================
+export const wishlistApi = {
+  getAll: async () => {
+    const userStr = await AsyncStorage.getItem("user");
+    if (!userStr) return [];
+    const user = JSON.parse(userStr);
+
+    const response = await apiClient.get(`/Wishlist/${user.id}`);
+    const variantIds = response.data;
+
+    if (!Array.isArray(variantIds) || variantIds.length === 0) {
+      return [];
+    }
+
+    const allProducts = await productApi.getAll();
+    
+    const wishlistItems = [];
+    allProducts.forEach(product => {
+      if (product.variants) {
+        product.variants.forEach(variant => {
+          if (variantIds.includes(variant.id)) {
+            wishlistItems.push({
+              id: variant.id,
+              variantId: variant.id,
+              productId: product.id,
+              name: product.name,
+              sku: variant.sku,
+              color: variant.color,
+              size: variant.size,
+              price: variant.price,
+              image: product.imageUrl
+            });
+          }
+        });
+      }
+    });
+
+    return wishlistItems;
+  },
+
+  add: async (variantId) => {
+    const userStr = await AsyncStorage.getItem("user");
+    if (!userStr) throw new Error("Vui lòng đăng nhập");
+    const user = JSON.parse(userStr);
+
+    const response = await apiClient.post("/Wishlist", {
+      userId: user.id,
+      variantId: variantId,
+    });
+    return response.data;
+  },
+
+  remove: async (variantId) => {
+    const userStr = await AsyncStorage.getItem("user");
+    if (!userStr) throw new Error("Vui lòng đăng nhập");
+    const user = JSON.parse(userStr);
+
+    const response = await apiClient.delete(`/Wishlist/${user.id}/${variantId}`);
+    return response.data;
+  },
+};
+
 // ================= SUPPLIER =================
 export const supplierApi = {
   getAll: async () => {
