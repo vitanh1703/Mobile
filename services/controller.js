@@ -1,5 +1,5 @@
 export const authController = {
-  validateLogin: (email: string, password: string) => {
+  validateLogin: (email, password) => {
     email = email?.trim();
     password = password?.trim();
 
@@ -20,7 +20,7 @@ export const authController = {
     return { success: true };
   },
   
-  validateRegister: (data: any) => {
+  validateRegister: (data) => {
     const { name, lastname, email, password, confirmPassword } = data;
     
     if (!name || !lastname || !email || !password || !confirmPassword) {
@@ -46,7 +46,7 @@ export const authController = {
 };
 
 export const checkoutController = {
-  validateCheckout: (data: any) => {
+  validateCheckout: (data) => {
     const { fullName, email, phone, address } = data;
 
     // check rỗng
@@ -96,7 +96,7 @@ export const checkoutController = {
 };
 
 export const supplierController = {
-  validateSupplier: (data: any): { success: boolean; message?: string; field?: string } => {
+  validateSupplier: (data) => {
     const { name, phone, address } = data;
     
     // Validate tên nhà cung cấp
@@ -132,7 +132,7 @@ export const supplierController = {
 };
 
 export const productController = {
-  validateProduct: (data: any): { success: boolean; message?: string; field?: string } => {
+  validateProduct: (data) => {
     const { name, brandText, description, imageUrl, categoryId, supplierId } = data;
     
     // Validate tên sản phẩm
@@ -213,7 +213,7 @@ export const productController = {
 };
 
 export const newsController = {
-  validateNews: (data: any): { success: boolean; message?: string; field?: string } => {
+  validateNews: (data) => {
     const { title, category, description, content, imgUrl, publishDate } = data;
     
     // Validate tiêu đề
